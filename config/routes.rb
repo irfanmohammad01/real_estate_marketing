@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
-  mount Rswag::Ui::Engine => '/api-docs'
-  mount Rswag::Api::Engine => '/api-docs'
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -27,7 +26,7 @@ Rails.application.routes.draw do
 
   resources :email_types, only: [ :create, :index ]
   get "/email_templates/by_type", to: "email_templates#by_type"
-  resources :email_templates, only: [ :create, :index, :show ]
+  resources :email_templates, only: [ :create, :index, :show, :update ]
 
 
 

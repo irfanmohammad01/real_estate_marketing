@@ -1,13 +1,13 @@
 class EmailTemplatesController < ApplicationController
   before_action -> { authorize_org_member!("ORG_ADMIN", "ORG_USER") }
-  before_action :set_email_template, only: [ :show ]
+  before_action :set_email_template, only: [ :show, :update ]
 
   def create
     template = EmailTemplate.new(email_template_params)
     template.organization_id = current_user.organization_id
 
     if template.save
-      render json: template, status: :created
+      render json: { message: "Email template created successfully" }, status: :created
     else
       render json: { errors: template.errors.full_messages }, status: :unprocessable_entity
     end
@@ -35,7 +35,13 @@ class EmailTemplatesController < ApplicationController
     render json: templates
   end
 
-
+  def update
+    if @email_template.update(email_update_template_params)
+      render json: { message: "Email template updated successfully" }, status: :ok
+    else
+      render json: { errors: @email_template.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
 
   private
 
@@ -45,6 +51,20 @@ class EmailTemplatesController < ApplicationController
       organization_id: current_user.organization_id
     )
   end
+
+  def email_update_template_params
+    params.require(:email_template).permit(
+      :name,
+      :subject,
+      :preheader,
+      :from_name,
+      :from_email,
+      :reply_to,
+      :html_body,
+      :text_body
+    )
+  end
+
 
   def email_template_params
     params.require(:email_template).permit(
