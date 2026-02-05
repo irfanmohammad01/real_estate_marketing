@@ -1,6 +1,6 @@
 class UserMailer < ApplicationMailer
   
-  def invitation_email(user, invitation_link)
+  def invitation_email(user, invitation_link, temporary_password)
     template = EmailTemplate
       .joins(:email_type)
       .where(
@@ -11,8 +11,8 @@ class UserMailer < ApplicationMailer
 
     raise "Email template not found" unless template
 
-    @html_body = render_template(template.html_body, invitation_link)
-    @text_body = render_template(template.text_body, invitation_link)
+    @html_body = render_template(template.html_body, invitation_link, temporary_password)
+    @text_body = render_template(template.text_body, invitation_link, temporary_password)
 
     mail(
       from: format_email(template.from_name, template.from_email),
@@ -35,8 +35,8 @@ class UserMailer < ApplicationMailer
     end
   end
 
-  def render_template(body, invitation_link)
-    body.to_s.gsub("{{invitation_link}}", invitation_link)
+  def render_template(body, invitation_link, temporary_password)
+    body.to_s.gsub("{{invitation_link}}", invitation_link).gsub("{{temporary_password}}", temporary_password)
   end
 
   def format_email(name, email)

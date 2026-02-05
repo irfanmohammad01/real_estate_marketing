@@ -13,7 +13,8 @@ class Admin::OrgAdminsController < ApplicationController
 
     if user.save
       invitation_link = ENV["INVITATION_LINK"]
-      UserMailer.invitation_email(user, invitation_link).deliver_later
+      temporary_password = ENV["TEMPORARY_PASSWORD"]
+      UserMailer.invitation_email(user, invitation_link, temporary_password).deliver_later
       render json: user, status: :created
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity

@@ -14,7 +14,7 @@ Rails.application.routes.draw do
 
   # org admin create & update
   namespace :admin do
-    resource :org_admin, only: [ :create, :update ]
+    resource :org_admins, only: [ :create, :update ]
   end
 
   resources :organizations do
