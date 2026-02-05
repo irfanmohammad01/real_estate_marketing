@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount Rswag::Ui::Engine => '/api-docs'
+  mount Rswag::Api::Engine => '/api-docs'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -11,16 +13,22 @@ Rails.application.routes.draw do
   # user agent login
   post "/auth/login", to: "auth/users#login"
 
-  # org admin create
-  post "/admin/org_admins", to: "admin/org_admins#create"
-  # org admin update
-  patch "/admin/org_admins/:id", to: "admin/org_admins#update"
+  # org admin create & update
+  namespace :admin do
+    resource :org_admin, only: [ :create, :update ]
+  end
 
   resources :organizations do
     post :restore, on: :member
   end
 
-  resources :users, only: [ :create, :update, :index ]
+  resources :users, only: [ :create, :update, :index, :show ]
+
+
+  resources :email_types, only: [ :create, :index ]
+  get "/email_templates/by_type", to: "email_templates#by_type"
+  resources :email_templates, only: [ :create, :index, :show ]
+
 
 
   # Defines the root path route ("/")

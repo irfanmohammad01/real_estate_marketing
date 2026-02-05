@@ -10,9 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_04_191234) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_05_055203) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "email_templates", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "email_type_id", null: false
+    t.string "from_email"
+    t.string "from_name", limit: 150
+    t.text "html_body"
+    t.string "name", limit: 150
+    t.bigint "organization_id", null: false
+    t.string "preheader"
+    t.string "reply_to"
+    t.string "subject"
+    t.text "text_body"
+    t.datetime "updated_at", null: false
+    t.index ["email_type_id"], name: "index_email_templates_on_email_type_id"
+    t.index ["organization_id"], name: "index_email_templates_on_organization_id"
+  end
+
+  create_table "email_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.string "key"
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_email_types_on_key", unique: true
+  end
 
   create_table "organizations", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -50,6 +75,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_04_191234) do
     t.index ["role_id"], name: "index_users_on_role_id"
   end
 
+  add_foreign_key "email_templates", "email_types"
+  add_foreign_key "email_templates", "organizations"
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "roles"
 end

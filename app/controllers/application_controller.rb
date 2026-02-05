@@ -38,7 +38,7 @@ class ApplicationController < ActionController::API
 
 
   # before_action -> { authorize_roles!("ORG_ADMIN", "ORG_USER") }
-  def authorize_org_member!(roles)
+  def authorize_org_member!(*roles)
     unless current_user && roles.include?(current_user.role.name)
       render json: { error: "Forbidden" }, status: :forbidden
     end

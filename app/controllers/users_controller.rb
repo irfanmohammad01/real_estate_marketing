@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_action :authorize_org_admin!
-  before_action :set_user, only: [ :update ]
+  before_action :set_user, only: [ :update, :show ]
 
   def index
     @users = User.where(organization_id: current_user.organization_id)
@@ -28,6 +28,10 @@ class UsersController < ApplicationController
     else
       render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  def show
+    render json: @user
   end
 
   private
