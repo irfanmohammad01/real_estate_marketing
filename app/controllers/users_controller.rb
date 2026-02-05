@@ -2,6 +2,11 @@ class UsersController < ApplicationController
   before_action :authorize_org_admin!
   before_action :set_user, only: [ :update ]
 
+  def index
+    @users = User.where(organization_id: current_user.organization_id)
+    render json: @users
+  end
+
   def create
     role = Role.find_by!(name: "ORG_USER")
 
@@ -35,7 +40,7 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(
+    params.permit(
       :full_name,
       :email,
       :password,
@@ -44,7 +49,7 @@ class UsersController < ApplicationController
   end
 
   def update_user_params
-    params.require(:user).permit(
+    params.permit(
       :full_name,
       :phone
     )
