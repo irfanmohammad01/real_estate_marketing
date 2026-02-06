@@ -8,16 +8,26 @@ class UsersController < ApplicationController
   end
 
   def create
-    role = Role.find_by!(name: "ORG_USER")
+    role = Role.find_by!(name: ENV["ORG_USER_ROLE"])
 
     user = User.new(user_params)
     user.role = role
     user.organization_id = current_user.organization_id
-    user.status = "active"
+    user.status = ENV["ORG_USER_STATUS"]
+    user.password = ENV["INTIAL_PASSWORD"]
 
     if user.save
-      invitation_link = ENV["INVITATION_LINK"]
-      UserMailer.invitation_email(user, invitation_link).deliver_later
+      begin
+        invitation_link = ENV["INVITATION_LINK"]
+        password = ENV["INTIAL_PASSWORD"]
+        if invitation_link.present?
+          UserMailer.invitation_email(user, invitation_link, password).deliver_later
+        else
+          Rails.logger.warn "INVITATION_LINK not configured. Skipping invitation email."
+        end
+      rescue => e
+        Rails.logger.error "Failed to send invitation email: #{e.message}"
+      end
       render json: user, status: :created
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity

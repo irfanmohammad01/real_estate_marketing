@@ -28,7 +28,7 @@ class UserMailer < ApplicationMailer
   private
 
   def template_name_for(user)
-    if user.role.name == "ORG_ADMIN"
+    if user.role.name == ENV["ORG_ADMIN_ROLE"]
       "Admin Invitation Template"
     else
       "Org Agent Invitation Template"

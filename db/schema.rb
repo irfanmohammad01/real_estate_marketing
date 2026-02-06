@@ -10,9 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_05_055203) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_06_023810) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "bhk_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_bhk_types_on_name", unique: true
+  end
+
+  create_table "contacts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "first_name"
+    t.string "last_name"
+    t.integer "organization_id"
+    t.string "phone"
+    t.datetime "updated_at", null: false
+  end
 
   create_table "email_templates", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -39,6 +56,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_055203) do
     t.index ["key"], name: "index_email_types_on_key", unique: true
   end
 
+  create_table "furnishing_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_furnishing_types_on_name", unique: true
+  end
+
+  create_table "locations", force: :cascade do |t|
+    t.string "city"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
@@ -46,6 +76,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_055203) do
     t.string "name"
     t.datetime "updated_at", null: false
     t.index ["deleted_at"], name: "index_organizations_on_deleted_at"
+  end
+
+  create_table "power_backup_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_power_backup_types_on_name", unique: true
+  end
+
+  create_table "preferences", force: :cascade do |t|
+    t.integer "bhk_type_id"
+    t.integer "contact_id"
+    t.datetime "created_at", null: false
+    t.integer "furnishing_type_id"
+    t.integer "location_id"
+    t.integer "power_backup_type_id"
+    t.integer "property_type_id"
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "property_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_property_types_on_name", unique: true
   end
 
   create_table "roles", force: :cascade do |t|

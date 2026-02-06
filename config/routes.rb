@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount Rswag::Ui::Engine => "/api-docs"
+  mount Rswag::Api::Engine => "/api-docs"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -16,6 +18,9 @@ Rails.application.routes.draw do
   namespace :admin do
     resource :org_admins, only: [ :create, :update ]
   end
+
+  # Create organization with first user (super user only)
+  # post "/organizations/create_with_user", to: "organizations#create_with_user"
 
   resources :organizations do
     post :restore, on: :member
