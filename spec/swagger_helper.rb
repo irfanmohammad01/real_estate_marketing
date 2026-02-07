@@ -4,40 +4,80 @@ require 'rails_helper'
 
 RSpec.configure do |config|
   # Specify a root folder where Swagger JSON files are generated
-  # NOTE: If you're using the rswag-api to serve API descriptions, you'll need
-  # to ensure that it's configured to serve Swagger from the same folder
   config.openapi_root = Rails.root.join('swagger').to_s
 
   # Define one or more Swagger documents and provide global metadata for each one
-  # When you run the 'rswag:specs:swaggerize' rake task, the complete Swagger will
-  # be generated at the provided relative path under openapi_root
-  # By default, the operations defined in spec files are added to the first
-  # document below. You can override this behavior by adding a openapi_spec tag to the
-  # the root example_group in your specs, e.g. describe '...', openapi_spec: 'v2/swagger.json'
   config.openapi_specs = {
     'v1/swagger.yaml' => {
       openapi: '3.0.1',
       info: {
-        title: 'API V1',
-        version: 'v1'
+        title: 'Real Estate Marketing API',
+        version: 'v1',
+        description: 'API for managing real estate organizations, users, and email marketing templates. Supports multi-tenant architecture with organization-based access control.'
       },
       paths: {},
       servers: [
         {
+          url: 'http://localhost:3000',
+          description: 'Development server'
+        },
+        {
           url: 'https://{defaultHost}',
           variables: {
             defaultHost: {
-              default: 'www.example.com'
+              default: 'api.example.com'
+            }
+          },
+          description: 'Production server'
+        }
+      ],
+      components: {
+        securitySchemes: {
+          Bearer: {
+            type: :http,
+            scheme: :bearer,
+            bearerFormat: 'JWT',
+            description: 'JWT Bearer token authentication. Use super user token for admin endpoints, regular user token for organization-specific endpoints.'
+          }
+        },
+        schemas: {
+          ErrorResponse: {
+            type: :object,
+            properties: {
+              errors: {
+                type: :object,
+                description: 'Error messages organized by field or category'
+              }
+            }
+          },
+          Organization: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              name: { type: :string },
+              description: { type: :string },
+              created_at: { type: :string, format: :datetime },
+              updated_at: { type: :string, format: :datetime },
+              deleted_at: { type: :string, format: :datetime, nullable: true }
+            }
+          },
+          User: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              full_name: { type: :string },
+              email: { type: :string, format: :email },
+              phone: { type: :string },
+              status: { type: :string },
+              organization_id: { type: :integer },
+              role_id: { type: :integer }
             }
           }
         }
-      ]
+      }
     }
   }
 
-  # Specify the format of the output Swagger file when running 'rswag:specs:swaggerize'.
-  # The openapi_specs configuration option has the filename including format in
-  # the key, this may want to be changed to avoid putting yaml in json files.
-  # Defaults to json. Accepts ':json' and ':yaml'.
+  # Specify the format of the output Swagger file
   config.openapi_format = :yaml
 end

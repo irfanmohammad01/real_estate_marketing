@@ -1,35 +1,84 @@
 class ContactsController < ApplicationController
-  # before_action :authorize_org_member!
+  before_action -> { authorize_org_member!("ORG_ADMIN", "ORG_USER") }
 
-  # def create
-  #   contact = Contact.new(contact_params)
-  #   contact.organization_id = current_user.organization_id
+  def create
+    contact = Contact.new(contact_params)
+    contact.organization_id = current_user.organization_id
 
-  #   ActiveRecord::Base.transaction do
-  #     contact.save!
+    ActiveRecord::Base.transaction do
+      contact.save!
 
-  #     if params[:preference].present?
-  #       Preference.create!(
-  #         contacts_id: contact.id,
-  #         bhk_type_id: params[:preference][:bhk_type_id],
-  #         furnishing_type_id: params[:preference][:furnishing_type_id]
-  #       )
-  #     end
-  #   end
+      if params[:preference].present?
+        Preference.create!(
+          contact_id: contact.id,
+          bhk_type_id: BhkType.find_by(name: params[:preference][:bhk_type])&.id,
+          furnishing_type_id: FurnishingType.find_by(name: params[:preference][:furnishing_type])&.id,
+          location_id: Location.find_by(city: params[:preference][:location])&.id,
+          property_type_id: PropertyType.find_by(name: params[:preference][:property_type])&.id,
+          power_backup_type_id: PowerBackupType.find_by(name: params[:preference][:power_backup_type])&.id
+        )
+      end
+    end
 
-  #   render json: contact, status: :created
-  # rescue ActiveRecord::RecordInvalid => e
-  #   render json: { error: e.message }, status: :unprocessable_entity
-  # end
+    render json: contact, status: :created
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
 
-  # private
+  def import
+    uploaded_file = params[:file]
 
-  # def contact_params
-  #   params.require(:contact).permit(
-  #     :first_name,
-  #     :last_name,
-  #     :email,
-  #     :phone
-  #   )
-  # end
+    if uploaded_file.nil? && request.content_type&.include?("multipart/form-data")
+      uploaded_file = extract_file_from_raw_body
+    end
+
+    unless uploaded_file
+      render json: { error: "No file uploaded. Please provide a file parameter." }, status: :unprocessable_entity
+      return
+    end
+
+    organization_id = current_user.organization_id
+    timestamp = Time.now.to_i
+    tmp_path = Rails.root.join("tmp", "contacts_#{timestamp}.csv")
+
+    File.open(tmp_path, "wb") { |f| f.write(uploaded_file.read) }
+
+    ContactCsvImportWorker.perform_async(tmp_path.to_s, organization_id)
+
+    render json: { message: "Import started successfully" }, status: :accepted
+  rescue => e
+    Rails.logger.error "Import error: #{e.message}\n#{e.backtrace.join("\n")}"
+    render json: { error: "Failed to import file: #{e.message}" }, status: :unprocessable_entity
+  end
+
+
+  private
+
+  def extract_file_from_raw_body
+    multipart_param = params.keys.find { |k| k.include?("Content-Disposition") }
+    return nil unless multipart_param
+
+    raw_content = params[multipart_param]
+    content_start = raw_content.index("\r\n\r\n")
+    return nil unless content_start
+
+    content_start += 4
+    content_end = raw_content.rindex("\r\n---")
+    return nil unless content_end
+
+    csv_content = raw_content[content_start...content_end]
+    StringIO.new(csv_content)
+  rescue => e
+    Rails.logger.error "Manual parsing failed: #{e.message}"
+    nil
+  end
+
+  def contact_params
+    params.require(:contact).permit(
+      :first_name,
+      :last_name,
+      :email,
+      :phone
+    )
+  end
 end

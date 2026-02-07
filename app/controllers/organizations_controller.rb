@@ -50,7 +50,7 @@ class OrganizationsController < ApplicationController
       user.organization_id = organization.id
       user.role = role
       user.status = ENV["ORG_ADMIN_STATUS"]
-      user.password = ENV["INTIAL_PASSWORD"]
+      user.password = ENV["INITIAL_PASSWORD"]
 
       unless user.save
         render json: { errors: { user: user.errors.full_messages } }, status: :unprocessable_entity
@@ -59,7 +59,7 @@ class OrganizationsController < ApplicationController
 
       begin
         invitation_link = ENV["INVITATION_LINK"]
-        password = ENV["INTIAL_PASSWORD"]
+        password = ENV["INITIAL_PASSWORD"]
         if invitation_link.present?
           UserMailer.invitation_email(user, invitation_link, password).deliver_later
         else

@@ -4,8 +4,7 @@ class UserMailer < ApplicationMailer
     template = EmailTemplate
       .joins(:email_type)
       .where(
-        email_types: { key: "INVITE_EMAIL" },
-        organization_id: user.organization_id
+        email_types: { key: "INVITE_EMAIL" }
       )
       .find_by(name: template_name_for(user))
 

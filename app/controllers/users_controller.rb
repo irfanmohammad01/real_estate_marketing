@@ -14,12 +14,12 @@ class UsersController < ApplicationController
     user.role = role
     user.organization_id = current_user.organization_id
     user.status = ENV["ORG_USER_STATUS"]
-    user.password = ENV["INTIAL_PASSWORD"]
+    user.password = ENV["INITIAL_PASSWORD"]
 
     if user.save
       begin
         invitation_link = ENV["INVITATION_LINK"]
-        password = ENV["INTIAL_PASSWORD"]
+        password = ENV["INITIAL_PASSWORD"]
         if invitation_link.present?
           UserMailer.invitation_email(user, invitation_link, password).deliver_later
         else

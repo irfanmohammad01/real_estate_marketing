@@ -34,6 +34,12 @@ Rails.application.routes.draw do
   resources :email_templates, only: [ :create, :index, :show, :update ]
 
 
+  resources :contacts, only: [ :create ] do
+    collection do
+      post :import
+    end
+  end
+
 
   # Defines the root path route ("/")
   # root "posts#index"

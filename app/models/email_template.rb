@@ -3,7 +3,7 @@ class EmailTemplate < ApplicationRecord
   belongs_to :email_type
 
   validates :from_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }
 
   validates :name, presence: true
   validates :subject, presence: true
