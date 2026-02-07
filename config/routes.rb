@@ -33,6 +33,8 @@ Rails.application.routes.draw do
   get "/email_templates/by_type", to: "email_templates#by_type"
   resources :email_templates, only: [ :create, :index, :show, :update ]
 
+  # Preferences
+  resources :preferences, only: [ :index ]
 
   resources :contacts, only: [ :create, :index ] do
     collection do

@@ -1045,6 +1045,105 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/preferences":
+    get:
+      summary: Get all preferences
+      tags:
+      - Preferences
+      description: Retrieve all preference types grouped (bhk_types, furnishing_types, property_types, locations, power_backup_types) (Org Admin or Org User)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bhk_types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                  furnishing_types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                  property_types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                  locations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        city:
+                          type: string
+                  power_backup_types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+              example:
+                bhk_types:
+                - id: 1
+                  name: 1BHK
+                - id: 2
+                  name: 2BHK
+                furnishing_types:
+                - id: 1
+                  name: Fully Furnished
+                - id: 2
+                  name: Semi Furnished
+                property_types:
+                - id: 1
+                  name: Apartment
+                - id: 2
+                  name: Villa
+                locations:
+                - id: 1
+                  city: Mumbai
+                - id: 2
+                  city: Delhi
+                power_backup_types:
+                - id: 1
+                  name: Full Backup
+                - id: 2
+                  name: Partial Backup
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/contacts":
     get:
       summary: List all contacts
