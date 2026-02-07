@@ -3,6 +3,10 @@ class ApplicationController < ActionController::API
   before_action :authorize_request
   attr_reader :current_super_user, :current_user
 
+  rescue_from AuthenticationError do |e|
+    render json: { error: e.message }, status: :unauthorized
+  end
+
   def authorize_request
     header = request.headers["Authorization"]
     token = header&.split(" ")&.last

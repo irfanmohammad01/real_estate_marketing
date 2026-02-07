@@ -13,7 +13,7 @@ class JsonWebToken
     rescue JWT::ExpiredSignature
       raise AuthenticationError, "Token has expired"
     rescue JWT::DecodeError => e
-      raise AuthenticationError, "Invalid token: #{e.message}"
+      raise AuthenticationError, "Invalid or malformed token"
     end
   end
 end
