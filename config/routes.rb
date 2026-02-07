@@ -36,6 +36,11 @@ Rails.application.routes.draw do
   # Preferences
   resources :preferences, only: [ :index ]
 
+  # Audiences
+  resources :audiences do
+    post :restore, on: :member
+  end
+
   resources :contacts, only: [ :create, :index ] do
     collection do
       get :paginated

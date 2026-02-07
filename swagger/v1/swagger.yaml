@@ -1144,6 +1144,318 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/audiences":
+    get:
+      summary: List all audiences
+      tags:
+      - Audiences
+      description: Retrieve all audiences in the current organization (Org Admin or Org User)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Audience"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    post:
+      summary: Create audience
+      tags:
+      - Audiences
+      description: Create a new audience segment with preference filters. Pass preference names (not IDs) and they will be automatically converted. (Org Admin or Org User)
+      security:
+      - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                audience:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Luxury Apartment Seekers"
+                    bhk_type:
+                      type: string
+                      nullable: true
+                      example: "3BHK"
+                      description: BHK type name (optional)
+                    furnishing_type:
+                      type: string
+                      nullable: true
+                      example: "Fully Furnished"
+                      description: Furnishing type name (optional)
+                    location:
+                      type: string
+                      nullable: true
+                      example: "Mumbai"
+                      description: City name (optional)
+                    property_type:
+                      type: string
+                      nullable: true
+                      example: "Apartment"
+                      description: Property type name (optional)
+                    power_backup_type:
+                      type: string
+                      nullable: true
+                      example: "Full Backup"
+                      description: Power backup type name (optional)
+                  required:
+                  - name
+              required:
+              - audience
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Audience"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  "/audiences/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Audience ID
+    get:
+      summary: Show audience details
+      tags:
+      - Audiences
+      description: Retrieve details of a specific audience (Org Admin or Org User)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Audience"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Audience not found
+    patch:
+      summary: Update audience
+      tags:
+      - Audiences
+      description: Update audience details and preferences. Pass preference names (not IDs) and they will be automatically converted. (Org Admin or Org User)
+      security:
+      - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                audience:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    bhk_type:
+                      type: string
+                      nullable: true
+                    furnishing_type:
+                      type: string
+                      nullable: true
+                    location:
+                      type: string
+                      nullable: true
+                    property_type:
+                      type: string
+                      nullable: true
+                    power_backup_type:
+                      type: string
+                      nullable: true
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Audience"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '422':
+          description: validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+    delete:
+      summary: Delete audience
+      tags:
+      - Audiences
+      description: Delete an audience (Org Admin or Org User)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Audience deleted successfully
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  "/audiences/{id}/restore":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Audience ID
+    post:
+      summary: Restore deleted audience
+      tags:
+      - Audiences
+      description: Restore a soft-deleted audience (Org Admin or Org User)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Audience restored successfully
+                  audience:
+                    "$ref": "#/components/schemas/Audience"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Deleted audience not found
   "/contacts":
     get:
       summary: List all contacts
@@ -1448,3 +1760,42 @@ components:
         updated_at:
           type: string
           format: datetime
+    Audience:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        name:
+          type: string
+        bhk_type:
+          type: string
+          nullable: true
+          description: BHK type name
+        furnishing_type:
+          type: string
+          nullable: true
+          description: Furnishing type name
+        location:
+          type: string
+          nullable: true
+          description: City name
+        property_type:
+          type: string
+          nullable: true
+          description: Property type name
+        power_backup_type:
+          type: string
+          nullable: true
+          description: Power backup type name
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
+        deleted_at:
+          type: string
+          format: datetime
+          nullable: true

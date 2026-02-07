@@ -10,9 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_06_023810) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_07_100035) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "audiences", force: :cascade do |t|
+    t.integer "bhk_type_id"
+    t.datetime "created_at", null: false
+    t.datetime "deleted_at"
+    t.integer "furnishing_type_id"
+    t.integer "location_id"
+    t.string "name"
+    t.integer "organization_id"
+    t.integer "power_backup_type_id"
+    t.integer "property_type_id"
+    t.datetime "updated_at", null: false
+    t.index ["deleted_at"], name: "index_audiences_on_deleted_at"
+    t.index ["organization_id"], name: "index_audiences_on_organization_id"
+  end
 
   create_table "bhk_types", force: :cascade do |t|
     t.datetime "created_at", null: false

@@ -2,15 +2,12 @@ class EmailTemplate < ApplicationRecord
   belongs_to :organization
   belongs_to :email_type
 
+  validates :name, presence: true, length: { maximum: 150 }
+  validates :subject, presence: true, length: { maximum: 255 }
+  validates :preheader, presence: true, length: { maximum: 255 }
+  validates :from_name, presence: true, length: { maximum: 150 }
   validates :from_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :reply_to, format: { with: URI::MailTo::EMAIL_REGEXP }
-
-  validates :name, presence: true
-  validates :subject, presence: true
-  validates :preheader, presence: true
-  validates :from_name, presence: true
-  validates :from_email, presence: true
-  validates :reply_to, presence: true
+  validates :reply_to, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :html_body, presence: true
   validates :text_body, presence: true
 end
