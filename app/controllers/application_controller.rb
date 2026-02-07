@@ -35,6 +35,12 @@ class ApplicationController < ActionController::API
     render json: { error: "Unauthorized" }, status: :unauthorized unless @current_super_user
   end
 
+  def authorize_super_or_org_admin! 
+    unless @current_super_user || org_admin? 
+      render json: { error: "Not authorized" }, status: :forbidden 
+    end 
+  end
+
   def authorize_org_admin!
     unless org_admin?
       render json: { error: "Forbidden" }, status: :forbidden

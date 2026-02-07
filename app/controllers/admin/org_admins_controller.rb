@@ -1,20 +1,22 @@
 # /app/controllers/admin/org_admins_controller.rb
 
 class Admin::OrgAdminsController < ApplicationController
-  before_action :authorize_super_user!
+  before_action :authorize_super_user!, only: [ :create ]
+  before_action :authorize_super_or_org_admin!, only: [ :update ]
   before_action :set_user, only: [ :update ]
 
   def create
-    role = Role.find_by!(name: "ORG_ADMIN")
+    role = Role.find_by!(name: ENV["ORG_ADMIN_ROLE"])
 
     user = User.new(user_params)
     user.role = role
-    user.status = "active"
+    user.status = ENV["ORG_USER_STATUS"]
+    user.password = ENV["INITIAL_PASSWORD"]
 
     if user.save
-      invitation_link = ENV["INVITATION_LINK"]
-      temporary_password = ENV["TEMPORARY_PASSWORD"]
-      UserMailer.invitation_email(user, invitation_link, temporary_password).deliver_later
+      # invitation_link = ENV["INVITATION_LINK"]
+      # temporary_password = ENV["INITIAL_PASSWORD"]
+      # UserMailer.invitation_email(user, invitation_link, temporary_password).deliver_later
       render json: user, status: :created
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity

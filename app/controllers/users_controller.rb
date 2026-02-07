@@ -21,7 +21,7 @@ class UsersController < ApplicationController
         invitation_link = ENV["INVITATION_LINK"]
         password = ENV["INITIAL_PASSWORD"]
         if invitation_link.present?
-          UserMailer.invitation_email(user, invitation_link, password).deliver_later
+          # UserMailer.invitation_email(user, invitation_link, password).deliver_later
         else
           Rails.logger.warn "INVITATION_LINK not configured. Skipping invitation email."
         end

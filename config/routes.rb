@@ -16,7 +16,7 @@ Rails.application.routes.draw do
 
   # org admin create & update
   namespace :admin do
-    resource :org_admins, only: [ :create, :update ]
+    resources :org_admins, only: [ :create, :update ]
   end
 
   # Create organization with first user (super user only)
