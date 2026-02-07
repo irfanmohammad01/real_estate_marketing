@@ -34,8 +34,9 @@ Rails.application.routes.draw do
   resources :email_templates, only: [ :create, :index, :show, :update ]
 
 
-  resources :contacts, only: [ :create ] do
+  resources :contacts, only: [ :create, :index ] do
     collection do
+      get :paginated
       post :import
     end
   end

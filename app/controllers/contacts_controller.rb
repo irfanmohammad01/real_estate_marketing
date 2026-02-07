@@ -51,6 +51,29 @@ class ContactsController < ApplicationController
     render json: { error: "Failed to import file: #{e.message}" }, status: :unprocessable_entity
   end
 
+  def paginated
+    page = params[:page] || 1
+    per_page = params[:per_page] || 25
+
+    @contacts = Contact.where(organization_id: current_user.organization_id)
+                       .page(page)
+                       .per(per_page)
+
+    render json: {
+      contacts: @contacts,
+      pagination: {
+        current_page: @contacts.current_page,
+        total_pages: @contacts.total_pages,
+        total_count: @contacts.total_count,
+        per_page: per_page.to_i
+      }
+    }
+  end
+
+  def index
+    @contacts = Contact.where(organization_id: current_user.organization_id)
+    render json: @contacts
+  end
 
   private
 

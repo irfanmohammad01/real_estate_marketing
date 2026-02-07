@@ -43,6 +43,8 @@ gem "sidekiq"
 
 gem "csv"
 
+gem "kaminari"
+
 gem "rswag"
 
 group :development, :test do
