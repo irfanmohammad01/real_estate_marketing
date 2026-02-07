@@ -3,8 +3,17 @@ openapi: 3.0.1
 info:
   title: Real Estate Marketing API
   version: v1
-  description: API for managing real estate organizations, users, and email marketing
-    templates. Supports multi-tenant architecture with organization-based access control.
+  description: |
+    API for managing real estate organizations, users, and email marketing templates. 
+    Supports multi-tenant architecture with organization-based access control.
+    
+    ## Rate Limiting
+    All endpoints are protected by rate limiting to prevent brute force attacks and abuse.
+    - **Default limit**: 5 requests per 60 seconds per IP address
+    - **Authentication endpoints**: Strictly rate limited to prevent credential stuffing
+    - **Response**: HTTP 429 (Too Many Requests) when limit exceeded
+    
+    Rate limits can be configured via environment variables (RATE_LIMIT_COUNT, RATE_LIMIT_WINDOW).
 servers:
 - url: http://localhost:3000
   description: Development server
@@ -64,6 +73,12 @@ paths:
                   error:
                     type: string
                     example: Invalid email or password
+        '429':
+          description: too many requests - rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitErrorResponse'
   "/auth/login":
     post:
       summary: User Login
@@ -118,6 +133,12 @@ paths:
                   error:
                     type: string
                     example: Invalid email or password
+        '429':
+          description: too many requests - rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitErrorResponse'
   "/organizations":
     get:
       summary: List all organizations
@@ -1799,3 +1820,10 @@ components:
           type: string
           format: datetime
           nullable: true
+    RateLimitErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Rate limit exceeded. Try again in 45 seconds.
+      description: Response returned when rate limit is exceeded (HTTP 429)

@@ -2,18 +2,15 @@ class OrganizationsController < ApplicationController
   before_action :authorize_super_user!
   before_action :set_organization, only: [ :show, :update, :destroy, :restore ]
 
-  # GET /organizations
   def index
     @organizations = Organization.all
     render json: @organizations
   end
 
-  # GET /organizations/:id
   def show
     render json: @organization
   end
 
-  # POST /organizations
   def create
     unless params[:organization].present?
       return render json: {
@@ -50,7 +47,8 @@ class OrganizationsController < ApplicationController
       user.organization_id = organization.id
       user.role = role
       user.status = ENV["ORG_ADMIN_STATUS"]
-      user.password = ENV["INITIAL_PASSWORD"]
+      temporary_password = PasswordGenerator.generate_password(length: 10, uppercase: true, lowercase: true, digits: true, symbols: true )
+      user.password = temporary_password
 
       unless user.save
         render json: { errors: { user: user.errors.full_messages } }, status: :unprocessable_entity
@@ -59,9 +57,8 @@ class OrganizationsController < ApplicationController
 
       begin
         invitation_link = ENV["INVITATION_LINK"]
-        password = ENV["INITIAL_PASSWORD"]
         if invitation_link.present?
-          UserMailer.invitation_email(user, invitation_link, password).deliver_later
+          UserMailer.invitation_email(user, invitation_link, temporary_password).deliver_later
         else
           Rails.logger.warn "INVITATION_LINK not configured. Skipping invitation email."
         end
@@ -89,7 +86,6 @@ class OrganizationsController < ApplicationController
   end
 
 
-  # PATCH /organizations/:id
   def update
     if @organization.update(organization_params)
       render json: @organization
@@ -98,7 +94,6 @@ class OrganizationsController < ApplicationController
     end
   end
 
-  # DELETE /organizations/:id
   def destroy
     @organization.destroy
     render json: { message: "Organization was soft deleted " }

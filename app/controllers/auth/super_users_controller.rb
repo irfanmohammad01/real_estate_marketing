@@ -1,5 +1,6 @@
 class Auth::SuperUsersController < ApplicationController
   skip_before_action :authorize_request, only: [ :login ]
+  rate_limit(**DEFAULT_RATE_LIMIT, only: [ :login ])
 
   def login
     super_user = SuperUser.find_by(email: params[:email])

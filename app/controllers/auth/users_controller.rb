@@ -1,5 +1,6 @@
 class Auth::UsersController < ApplicationController
   skip_before_action :authorize_request, only: [ :login ]
+  rate_limit(**DEFAULT_RATE_LIMIT, only: [ :login ])
 
   def login
     user = User.includes(:role).find_by(email: user_params[:email])

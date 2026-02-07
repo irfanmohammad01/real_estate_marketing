@@ -1,8 +1,7 @@
 class ApplicationController < ActionController::API
+  rate_limit(**DEFAULT_RATE_LIMIT)
   before_action :authorize_request
   attr_reader :current_super_user, :current_user
-
-  private
 
   def authorize_request
     header = request.headers["Authorization"]
@@ -35,29 +34,39 @@ class ApplicationController < ActionController::API
     render json: { error: "Unauthorized" }, status: :unauthorized unless @current_super_user
   end
 
-  def authorize_super_or_org_admin! 
-    unless @current_super_user || org_admin? 
-      render json: { error: "Not authorized" }, status: :forbidden 
-    end 
+  def authorize_super_or_org_admin!
+    unless @current_super_user || org_admin?
+      render json: { error: "Not authorized" }, status: :forbidden
+    end
   end
 
   def authorize_org_admin!
-    unless org_admin?
-      render json: { error: "Forbidden" }, status: :forbidden
+    unless current_user&.org_admin?
+      render_forbidden("ORG_ADMIN role required")
     end
-  end
-
-  def org_admin?
-    current_user&.role&.name == "ORG_ADMIN"
-  end
-
-  def org_user?
-    current_user&.role&.name == "ORG_USER"
   end
 
   def authorize_org_member!(*roles)
-    unless current_user && current_user.role && roles.include?(current_user.role.name)
-      render json: { error: "Forbidden" }, status: :forbidden
+    unless current_user && roles.any? { |r| current_user.send("#{r}?") rescue false }
+      render_forbidden("Insufficient permissions")
     end
   end
 end
+
+  private
+
+  def render_forbidden(message)
+    log_authorization_failure(message)
+    render json: { error: message }, status: :forbidden
+  end
+
+
+  def log_authorization_failure(reason)
+    Rails.logger.warn({
+      event: "authorization_failure",
+      user_id: current_user&.id,
+      reason: reason,
+      path: request.path,
+      timestamp: Time.current
+    }.to_json)
+  end

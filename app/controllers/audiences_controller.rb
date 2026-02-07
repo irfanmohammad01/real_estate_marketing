@@ -12,7 +12,6 @@ class AudiencesController < ApplicationController
   end
 
   def create
-    # Resolve preference names to IDs
     preference_ids = Audience.resolve_preference_ids(preference_params)
 
     audience = Audience.new(audience_params.merge(preference_ids))
@@ -26,7 +25,6 @@ class AudiencesController < ApplicationController
   end
 
   def update
-    # Resolve preference names to IDs
     preference_ids = Audience.resolve_preference_ids(preference_params)
 
     if @audience.update(audience_params.merge(preference_ids))
