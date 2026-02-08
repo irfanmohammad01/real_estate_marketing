@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_07_100035) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_08_113628) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,6 +34,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_07_100035) do
     t.string "name"
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_bhk_types_on_name", unique: true
+  end
+
+  create_table "common_email_templates", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "email_type_id", null: false
+    t.string "from_email", limit: 255, null: false
+    t.string "from_name", limit: 150, null: false
+    t.text "html_body", null: false
+    t.string "name", limit: 150
+    t.string "preheader", limit: 255
+    t.string "reply_to", limit: 255
+    t.string "subject", limit: 255
+    t.text "text_body"
+    t.datetime "updated_at", null: false
+    t.index ["email_type_id"], name: "index_common_email_templates_on_email_type_id"
   end
 
   create_table "contacts", force: :cascade do |t|

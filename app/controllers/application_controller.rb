@@ -35,7 +35,12 @@ class ApplicationController < ActionController::API
       return
     end
 
-    decoded = JsonWebToken.decode(token)
+    begin
+      decoded = JsonWebToken.decode(token)
+    rescue AuthenticationError => e
+      render json: { error: e.message }, status: :unauthorized
+      return
+    end
 
     unless decoded
       render json: { error: "Invalid token" }, status: :unauthorized
@@ -70,6 +75,7 @@ class ApplicationController < ActionController::API
   end
 
   def authorize_org_member!(*roles)
+    roles = roles.map { |r| r.to_s.downcase.to_sym }
     unless @current_user && roles.any? { |r| @current_user.send("#{r}?") rescue false }
       render_forbidden("Insufficient permissions")
     end
