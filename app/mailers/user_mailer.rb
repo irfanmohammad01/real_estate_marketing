@@ -5,20 +5,20 @@ class UserMailer < ApplicationMailer
   def invitation_email(user, invitation_link, temporary_password = nil)
     role_label = admin_user?(user) ? "Admin" : "Agent"
 
-    mail(
-      from: format_email(DEFAULT_FROM_NAME, DEFAULT_FROM_EMAIL),
-      to: user.email,
-      subject: subject_for(role_label),
-      reply_to: DEFAULT_FROM_EMAIL
-    ) do |format|
-      format.html do
-        render html: render_template(html_body_for(role_label), invitation_link, temporary_password).html_safe
-      end
+    # mail(
+    #   from: format_email(DEFAULT_FROM_NAME, DEFAULT_FROM_EMAIL),
+    #   to: user.email,
+    #   subject: subject_for(role_label),
+    #   reply_to: DEFAULT_FROM_EMAIL
+    # ) do |format|
+    #   format.html do
+    #     render html: render_template(html_body_for(role_label), invitation_link, temporary_password).html_safe
+    #   end
 
-      format.text do
-        render plain: render_template(text_body_for(role_label), invitation_link, temporary_password)
-      end
-    end
+    #   format.text do
+    #     render plain: render_template(text_body_for(role_label), invitation_link, temporary_password)
+    #   end
+    # end
   end
 
   private
