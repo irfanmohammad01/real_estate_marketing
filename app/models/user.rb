@@ -5,10 +5,6 @@ class User < ApplicationRecord
   belongs_to :role
   has_secure_password
 
-  def super_user?
-    role.name == Role::ROLES[:super_user]
-  end
-
   def org_admin?
     role.name == Role::ROLES[:org_admin]
   end
@@ -20,7 +16,7 @@ class User < ApplicationRecord
 
   validates :email, presence: true, uniqueness: { scope: :organization_id }, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }, if: -> { email.present? }
   validates :full_name, presence: true, length: { maximum: 150 }
-  validates :phone, length: { is: 10 }, if: -> { phone.present? }
+  validates :phone, presence: true, length: { is: 10 }
   validates :status, presence: true
   validates :password, presence: true, format: { with: VALID_PASSWORD_REGEX, message: "must include uppercase, lowercase, number, and special character" }, if: -> { password.present? }
 end

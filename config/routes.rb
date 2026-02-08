@@ -29,24 +29,24 @@ Rails.application.routes.draw do
   resources :users, only: [ :create, :update, :index, :show ]
 
 
-  resources :email_types, only: [ :create, :index ]
-  get "/email_templates/by_type", to: "email_templates#by_type"
-  resources :email_templates, only: [ :create, :index, :show, :update ]
+  # resources :email_types, only: [ :create, :index ]
+  # get "/email_templates/by_type", to: "email_templates#by_type"
+  # resources :email_templates, only: [ :create, :index, :show, :update ]
 
   # Preferences
-  resources :preferences, only: [ :index ]
+  # resources :preferences, only: [ :index ]
 
   # Audiences
-  resources :audiences do
-    post :restore, on: :member
-  end
+  # resources :audiences do
+  #   post :restore, on: :member
+  # end
 
-  resources :contacts, only: [ :create, :index ] do
-    collection do
-      get :paginated
-      post :import
-    end
-  end
+  # resources :contacts, only: [ :create, :index ] do
+  #   collection do
+  #     get :paginated
+  #     post :import
+  #   end
+  # end
 
 
   # Defines the root path route ("/")

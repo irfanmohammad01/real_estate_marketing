@@ -7,17 +7,18 @@ class Admin::OrgAdminsController < ApplicationController
   before_action :set_user, only: [ :update ]
 
   def create
-    role = Role.find_by!(name: ENV["ORG_ADMIN_ROLE"])
+    role = Role.find_by!(name: Role::ROLES[:org_admin])
     user = User.new(user_params)
     user.role = role
-    user.status = ENV["ORG_USER_STATUS"]
+    user.status = ENV["ORG_ADMIN_STATUS"]
     temporary_password = PasswordGenerator.generate_password(length: 10, uppercase: true, lowercase: true, digits: true, symbols: true)
     user.password = temporary_password
 
     if user.save
-      # invitation_link = ENV["INVITATION_LINK"]
-      # UserMailer.invitation_email(user, invitation_link, temporary_password).deliver_later
-      render json: user, status: :created
+      invitation_link = ENV["INVITATION_LINK"]
+      Rails.logger.info "Generated password: #{temporary_password}"
+      UserMailer.invitation_email(user, invitation_link, temporary_password).deliver_later
+      render json: @user.as_json(except: [ :password_digest ]).merge(role_name: @user.role.name, organization_name: @user.organization.name)
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
     end
@@ -25,7 +26,7 @@ class Admin::OrgAdminsController < ApplicationController
 
   def update
     if @user.update(update_user_params)
-      render json: @user, status: :ok
+      render json: @user.as_json(except: [ :password_digest ]).merge(role_name: @user.role.name, organization_name: @user.organization.name)
     else
       render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
@@ -34,9 +35,14 @@ class Admin::OrgAdminsController < ApplicationController
   private
 
   def set_user
-    @user = User.find_by!(
-      id: params[:id]
-    )
+    if @current_super_user
+      @user = User.find_by!(id: params[:id])
+    elsif @current_user&.org_admin?
+      @user = User.find_by!(id: params[:id], organization_id: @current_user.organization_id)
+      # Rails.logger.info "\ninside #{@user.as_json}\n"
+    else
+      raise ActiveRecord::RecordNotFound, "User not found"
+    end
   end
 
   def update_user_params
@@ -51,7 +57,6 @@ class Admin::OrgAdminsController < ApplicationController
       :organization_id,
       :full_name,
       :email,
-      :password,
       :phone
     )
   end

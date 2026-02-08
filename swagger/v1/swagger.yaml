@@ -28,7 +28,7 @@ paths:
       summary: Super User Login
       tags:
       - Authentication
-      description: Authenticate as a super user and receive a JWT token
+      description: Authenticate as a super user and receive a JWT token 
       requestBody:
         content:
           application/json:
@@ -84,7 +84,7 @@ paths:
       summary: User Login
       tags:
       - Authentication
-      description: Authenticate as a regular user and receive a JWT token
+      description: Authenticate as a Organization Admin or Organization User and receive a JWT token
       requestBody:
         content:
           application/json:
@@ -144,7 +144,7 @@ paths:
       summary: List all organizations
       tags:
       - Organizations
-      description: Retrieve a list of all organizations (Super User only)
+      description: Retrieve a list of all organizations (only Super User will see this endpoint, Org Admins and Org Users will not have access)
       security:
       - Bearer: []
       responses:
@@ -156,18 +156,51 @@ paths:
                 type: array
                 items:
                   "$ref": "#/components/schemas/Organization"
+              example:
+                - id: 34
+                  name: "Organization A"
+                  description: "This is Organization A. Welcome to our Organization."
+                  org_admins:
+                    - id: 21
+                      full_name: "Organization A Admin"
+                      email: "Organization@gmail.com"
+                      phone: "9876543210"
+                      status: "active"
+                      role: "ORG_ADMIN"
+                    - id: 26
+                      full_name: "Jagdish Organization A Admin"
+                      email: "OrganizationA.jagdish@joshsoftware.com"
+                      phone: "9876543210"
+                      status: "active"
+                      role: "ORG_ADMIN"
+                - id: 35
+                  name: "Organization B"
+                  description: "This is Organization B"
+                  org_admins:
+                    - id: 27
+                      full_name: "Org B Admin"
+                      email: "orgb@example.com"
+                      phone: "1234567890"
+                      status: "active"
+                      role: "ORG_ADMIN"
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
     post:
-      summary: Create organization with first user
+      summary: Create organization with Organization Admin
       tags:
       - Organizations
       description: Create a new organization and its first admin user in one atomic
-        operation (Super User only)
+        operation (Super User only can access this endpoint)
       security:
       - Bearer: []
       requestBody:
@@ -233,24 +266,60 @@ paths:
                         type: string
                       role:
                         type: string
+              example:
+                message: "Organization and first ORG_ADMIN created successfully"
+                organization:
+                  id: 7
+                  name: Acme Real Estate
+                  description: Leading real estate company
+                  created_at: "2026-02-08T12:45:00Z"
+                  updated_at: "2026-02-08T12:45:00Z"
+                user:
+                  id: 102
+                  full_name: John Doe
+                  email: admin@acme.com
+                  phone: "+1234567890"
+                  status: pending
+                  role: ORG_ADMIN
         '400':
           description: bad request - missing parameters
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  error:
+                    type: string
+                  errors:
+                    type: object
+              example:
+                errors:
+                  organization:
+                    - "Organization parameters are required"
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
         '422':
           description: validation failed
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              example:
+                errors:
+                  organization:
+                    - "Name can't be blank"
+                  user:
+                    - "Email has already been taken"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
   "/organizations/{id}":
     parameters:
     - name: id
@@ -272,19 +341,67 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Organization"
+                type: object
+                properties:
+                  organization:
+                    "$ref": "#/components/schemas/Organization"
+                  org_admins:
+                    type: array
+                    description: List of all organization admin users
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        full_name:
+                          type: string
+                        email:
+                          type: string
+                        phone:
+                          type: string
+                        status:
+                          type: string
+                        role:
+                          type: string
+              example:
+                organization:
+                  id: 34
+                  name: Organization A
+                  description: "This is Organization A. Welcome to our Organization."
+                  created_at: "2026-02-07T19:56:46.545Z"
+                  updated_at: "2026-02-07T19:56:46.545Z"
+                  deleted_at: null
+                org_admins:
+                - id: 21
+                  full_name: "Organization A Admin"
+                  email: "Organization@gmail.com"
+                  phone: "9876543210"
+                  status: "active"
+                  role: "ORG_ADMIN"
+                - id: 26
+                  full_name: "Jagdish Organization A Admin Updated 6"
+                  email: "OrganizationA.jagdish@joshsoftware.com"
+                  phone: "9876543210"
+                  status: "active"
+                  role: "ORG_ADMIN"
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
         '404':
-          description: not found
+          description: organization not found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/NotFoundErrorResponse"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
     patch:
       summary: Update organization
       tags:
@@ -312,18 +429,37 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/Organization"
+              example:
+                id: 34
+                name: "Organization A Updated"
+                description: "This is the updated description for Organization A"
+                created_at: "2026-02-07T19:56:46.545Z"
+                updated_at: "2026-02-08T16:00:00.000Z"
+                deleted_at: null
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
+        '404':
+          description: organization not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NotFoundErrorResponse"
         '422':
           description: validation failed
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
     delete:
       summary: Soft delete organization
       tags:
@@ -401,18 +537,33 @@ paths:
                 type: array
                 items:
                   "$ref": "#/components/schemas/User"
+              example:
+                - id: 21
+                  email: "user@organization.com"
+                  role_name: "ORG_ADMIN"
+                  organization_name: "Organization A"
+                - id: 22
+                  email: "user2@organization.com"
+                  role_name: "ORG_USER"
+                  organization_name: "Organization A"
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
         '403':
-          description: forbidden
+          description: forbidden - insufficient permissions
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ForbiddenErrorResponse"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
     post:
       summary: Create new user
       tags:
@@ -441,29 +592,52 @@ paths:
               - email
       responses:
         '201':
-          description: created
+          description: user created successfully
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/User"
+              example:
+                id: 25
+                email: "jane@organization.com"
+                full_name: "Jane Smith"
+                phone: "+1234567890"
+                status: "pending"
+                role_name: "ORG_USER"
+                organization_name: "Organization A"
+                organization_id: 34
+                role_id: 2
+                created_at: "2026-02-08T10:15:30.000Z"
+                updated_at: "2026-02-08T10:15:30.000Z"
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
         '403':
-          description: forbidden
+          description: forbidden - insufficient permissions
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ForbiddenErrorResponse"
         '422':
           description: validation failed
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+              example:
+                error: "User creation failed"
+                errors:
+                  - "Email has already been taken"
+                  - "Phone is too short (minimum is 10 characters)"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
   "/users/{id}":
     parameters:
     - name: id
@@ -487,24 +661,42 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/User"
+              example:
+                id: 21
+                email: "user@organization.com"
+                full_name: "John Doe"
+                phone: "+1234567890"
+                status: "active"
+                role_name: "ORG_ADMIN"
+                organization_name: "Organization A"
+                organization_id: 34
+                role_id: 1
+                created_at: "2026-02-07T19:56:46.545Z"
+                updated_at: "2026-02-08T10:15:30.000Z"
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
         '403':
-          description: forbidden
+          description: forbidden - insufficient permissions
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ForbiddenErrorResponse"
         '404':
-          description: not found
+          description: user not found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/NotFoundErrorResponse"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
     patch:
       summary: Update user
       tags:
@@ -524,29 +716,53 @@ paths:
                   type: string
       responses:
         '200':
-          description: success
+          description: user updated successfully
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/User"
+              example:
+                id: 21
+                email: "user@organization.com"
+                full_name: "John Doe Updated"
+                phone: "+9876543210"
+                status: "active"
+                role_name: "ORG_ADMIN"
+                organization_name: "Organization A"
+                organization_id: 34
+                role_id: 1
+                created_at: "2026-02-07T19:56:46.545Z"
+                updated_at: "2026-02-08T10:20:15.000Z"
         '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/UnauthorizedErrorResponse"
         '403':
-          description: forbidden
+          description: forbidden - insufficient permissions
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ForbiddenErrorResponse"
+        '404':
+          description: user not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NotFoundErrorResponse"
         '422':
           description: validation failed
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+                "$ref": "#/components/schemas/ValidationErrorResponse"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ServerErrorResponse"
   "/admin/org_admins":
     post:
       summary: Create organization admin
@@ -574,9 +790,6 @@ paths:
                       type: string
                       format: email
                       example: admin@organization.com
-                    password:
-                      type: string
-                      example: SecureP@ss123
                     phone:
                       type: string
                       example: "+1234567890"
@@ -584,7 +797,6 @@ paths:
                   - organization_id
                   - full_name
                   - email
-                  - password
       responses:
         '201':
           description: created
@@ -1730,6 +1942,25 @@ components:
           type: string
         description:
           type: string
+        org_admins:
+          type: array
+          description: List of organization admin users
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              full_name:
+                type: string
+              email:
+                type: string
+                format: email
+              phone:
+                type: string
+              status:
+                type: string
+              role:
+                type: string
         created_at:
           type: string
           format: datetime
@@ -1758,6 +1989,18 @@ components:
           type: integer
         role_id:
           type: integer
+        role_name:
+          type: string
+          description: Role name (e.g. org_admin, org_user)
+        organization_name:
+          type: string
+          description: Organization display name
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
     Contact:
       type: object
       properties:
@@ -1825,5 +2068,53 @@ components:
       properties:
         error:
           type: string
-          example: Rate limit exceeded. Try again in 45 seconds.
+          example: Rate limit exceeded. Please try again later.
       description: Response returned when rate limit is exceeded (HTTP 429)
+    NotFoundErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Record not found
+        message:
+          type: string
+          example: "Couldn't find User with 'id'=99999"
+      description: Response returned when a requested resource is not found (HTTP 404)
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        errors:
+          type: array
+          items:
+            type: string
+          example:
+            - "Email has already been taken"
+            - "Phone is too short (minimum is 10 characters)"
+      description: Response returned when validation fails (HTTP 422)
+    UnauthorizedErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Invalid token
+      description: Response returned when authentication fails (HTTP 401)
+    ForbiddenErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: ORG_ADMIN role required
+      description: Response returned when user lacks permissions (HTTP 403)
+    ServerErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Internal server error
+        message:
+          type: string
+          example: An unexpected error occurred
+      description: Response returned when an unexpected server error occurs (HTTP 500)

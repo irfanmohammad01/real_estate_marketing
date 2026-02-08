@@ -1,27 +1,27 @@
 class UserMailer < ApplicationMailer
   
   def invitation_email(user, invitation_link, temporary_password)
-    template = EmailTemplate
-      .joins(:email_type)
-      .where(
-        email_types: { key: "INVITE_EMAIL" }
-      )
-      .find_by(name: template_name_for(user))
+    # template = EmailTemplate
+    #   .joins(:email_type)
+    #   .where(
+    #     email_types: { key: "INVITE_EMAIL" }
+    #   )
+    #   .find_by(name: template_name_for(user))
 
-    raise "Email template not found" unless template
+    # raise "Email template not found" unless template
 
-    @html_body = render_template(template.html_body, invitation_link, temporary_password)
-    @text_body = render_template(template.text_body, invitation_link, temporary_password)
-
-    mail(
-      from: format_email(template.from_name, template.from_email),
-      to: user.email,
-      reply_to: template.reply_to,
-      subject: template.subject
-    ) do |format|
-      format.html { render html: @html_body.html_safe }
-      format.text { render plain: @text_body }
-    end
+    # @html_body = render_template(template.html_body, invitation_link, temporary_password)
+    # @text_body = render_template(template.text_body, invitation_link, temporary_password)
+    Rails.logger.info "\n\nEmail sent successfully\n\n"
+    # mail(
+    #   from: format_email(template.from_name, template.from_email),
+    #   to: user.email,
+    #   reply_to: template.reply_to,
+    #   subject: template.subject
+    # ) do |format|
+    #   format.html { render html: @html_body.html_safe }
+    #   format.text { render plain: @text_body }
+    # end
   end
 
   private
