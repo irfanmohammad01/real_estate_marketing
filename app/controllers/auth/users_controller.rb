@@ -20,7 +20,8 @@ class Auth::UsersController < ApplicationController
           full_name: user.full_name,
           email: user.email,
           role: user.role.name,
-          organization_id: user.organization_id
+          organization_id: user.organization_id,
+          organization_name: Organization.find(user.organization_id).name
         }
       }
     else
