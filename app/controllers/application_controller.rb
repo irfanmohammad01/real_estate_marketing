@@ -4,6 +4,14 @@ class ApplicationController < ActionController::API
 
   attr_reader :current_super_user, :current_user
 
+  # Exception handlers - order matters! Most general first, then more specific
+  # Rails checks rescue_from in reverse order (last to first)
+  rescue_from StandardError do |e|
+    Rails.logger.error "Unexpected error: #{e.class} - #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { error: "Internal server error", message: "An unexpected error occurred" }, status: :internal_server_error
+  end
+
   rescue_from AuthenticationError do |e|
     render json: { error: e.message }, status: :unauthorized
   end
@@ -18,12 +26,6 @@ class ApplicationController < ActionController::API
 
   rescue_from ActionController::ParameterMissing do |e|
     render json: { error: "Missing parameter", message: "Required parameter missing: #{e.param}" }, status: :bad_request
-  end
-
-  rescue_from StandardError do |e|
-    Rails.logger.error "Unexpected error: #{e.class} - #{e.message}"
-    Rails.logger.error e.backtrace.join("\n")
-    render json: { error: "Internal server error", message: "An unexpected error occurred" }, status: :internal_server_error
   end
 
   def authorize_request

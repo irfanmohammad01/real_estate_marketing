@@ -18,7 +18,7 @@ class Admin::OrgAdminsController < ApplicationController
       invitation_link = ENV["INVITATION_LINK"]
       Rails.logger.info "Generated password: #{temporary_password}"
       UserMailer.invitation_email(user, invitation_link, temporary_password).deliver_later
-      render json: @user.as_json(except: [ :password_digest ]).merge(role_name: @user.role.name, organization_name: @user.organization.name)
+      render json: user.as_json(except: [ :password_digest ]).merge(role_name: user.role.name, organization_name: user.organization.name)
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
     end
