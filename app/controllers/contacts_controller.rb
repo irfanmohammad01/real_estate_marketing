@@ -37,18 +37,44 @@ class ContactsController < ApplicationController
       return
     end
 
+    # Validate file type before saving
+    original_filename = uploaded_file.original_filename rescue "unknown"
+    file_extension = File.extname(original_filename).downcase
+
+    unless file_extension == ".csv"
+      render json: {
+        error: "Invalid file type",
+        message: "Only CSV files are allowed. You uploaded: #{original_filename}"
+      }, status: :unprocessable_entity
+      return
+    end
+
     organization_id = current_user.organization_id
     timestamp = Time.now.to_i
     tmp_path = Rails.root.join("tmp", "contacts_#{timestamp}.csv")
 
     File.open(tmp_path, "wb") { |f| f.write(uploaded_file.read) }
 
+    # Perform early validation on headers
+    begin
+      ContactCsvImportService.send(:validate_csv_file!, File.open(tmp_path))
+    rescue ContactCsvImportService::CsvValidationError => e
+      File.delete(tmp_path) if File.exist?(tmp_path)
+      render json: {
+        error: "CSV validation failed",
+        message: e.message
+      }, status: :unprocessable_entity
+      return
+    end
+
     ContactCsvImportWorker.perform_async(tmp_path.to_s, organization_id)
 
-    render json: { message: "Import started successfully" }, status: :accepted
+    render json: { message: "CSV validation passed. Import started successfully." }, status: :accepted
   rescue => e
     Rails.logger.error "Import error: #{e.message}\n#{e.backtrace.join("\n")}"
-    render json: { error: "Failed to import file: #{e.message}" }, status: :unprocessable_entity
+    # Clean up temp file on error
+    File.delete(tmp_path) if tmp_path && File.exist?(tmp_path)
+    render json: { error: "Failed to import file", message: e.message }, status: :unprocessable_entity
   end
 
   def paginated

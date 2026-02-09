@@ -6,6 +6,9 @@ class User < ApplicationRecord
   belongs_to :role
   has_secure_password
 
+  # Callbacks
+  before_create :generate_jti
+
   def org_admin?
     role.name == Role::ROLES[:org_admin]
   end
@@ -21,7 +24,15 @@ class User < ApplicationRecord
   validates :status, presence: true
   validates :password, presence: true, format: { with: VALID_PASSWORD_REGEX, message: "must include uppercase, lowercase, number, and special character" }, if: -> { password.present? }
 
+  # Generate new JTI for token revocation
   def rotate_jti!
     update!(jti: SecureRandom.uuid)
+  end
+
+  private
+
+  # Automatically generate JTI on user creation
+  def generate_jti
+    self.jti ||= SecureRandom.uuid
   end
 end
