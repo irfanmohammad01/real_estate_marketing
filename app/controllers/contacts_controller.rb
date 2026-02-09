@@ -28,8 +28,11 @@ class ContactsController < ApplicationController
   def import
     uploaded_file = params[:file]
 
+    # Try to extract from raw multipart body if not properly parsed
     if uploaded_file.nil? && request.content_type&.include?("multipart/form-data")
-      uploaded_file = extract_file_from_raw_body
+      result = extract_file_from_raw_body
+      uploaded_file = result[:file] if result
+      @extracted_filename = result[:filename] if result
     end
 
     unless uploaded_file
@@ -37,14 +40,21 @@ class ContactsController < ApplicationController
       return
     end
 
-    # Validate file type before saving
-    original_filename = uploaded_file.original_filename rescue "unknown"
-    file_extension = File.extname(original_filename).downcase
+    # Get filename - handle both ActionDispatch::Http::UploadedFile and StringIO
+    if uploaded_file.respond_to?(:original_filename)
+      filename = uploaded_file.original_filename
+    elsif @extracted_filename
+      filename = @extracted_filename
+    else
+      filename = "uploaded_file.csv"  # Default for StringIO
+    end
+
+    file_extension = File.extname(filename).downcase
 
     unless file_extension == ".csv"
       render json: {
         error: "Invalid file type",
-        message: "Only CSV files are allowed. You uploaded: #{original_filename}"
+        message: "Only CSV files are allowed. You uploaded: #{filename}"
       }, status: :unprocessable_entity
       return
     end
@@ -53,7 +63,15 @@ class ContactsController < ApplicationController
     timestamp = Time.now.to_i
     tmp_path = Rails.root.join("tmp", "contacts_#{timestamp}.csv")
 
-    File.open(tmp_path, "wb") { |f| f.write(uploaded_file.read) }
+    # Write to temp file - handle both types of file objects
+    File.open(tmp_path, "wb") do |f|
+      if uploaded_file.respond_to?(:read)
+        uploaded_file.rewind if uploaded_file.respond_to?(:rewind)
+        f.write(uploaded_file.read)
+      else
+        f.write(uploaded_file.to_s)
+      end
+    end
 
     # Perform early validation on headers
     begin
@@ -108,6 +126,12 @@ class ContactsController < ApplicationController
     return nil unless multipart_param
 
     raw_content = params[multipart_param]
+
+    # Extract filename from Content-Disposition header
+    filename_match = multipart_param.match(/filename="([^"]+)"/)
+    filename = filename_match ? filename_match[1] : "uploaded_file.csv"
+
+    # Extract file content
     content_start = raw_content.index("\r\n\r\n")
     return nil unless content_start
 
@@ -116,7 +140,9 @@ class ContactsController < ApplicationController
     return nil unless content_end
 
     csv_content = raw_content[content_start...content_end]
-    StringIO.new(csv_content)
+
+    # Return both file and filename
+    { file: StringIO.new(csv_content), filename: filename }
   rescue => e
     Rails.logger.error "Manual parsing failed: #{e.message}"
     nil
