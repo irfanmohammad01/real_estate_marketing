@@ -56,9 +56,9 @@ class Admin::OrgAdminsController < ApplicationController
 
   def set_user
     if @current_super_user
-      @user = User.find_by!(id: params[:id])
+      @user = User.with_deleted.find_by!(id: params[:id])
     elsif @current_user&.org_admin?
-      @user = User.find_by!(id: params[:id], organization_id: @current_user.organization_id)
+      @user = User.with_deleted.find_by!(id: params[:id], organization_id: @current_user.organization_id)
       # Rails.logger.info "\ninside #{@user.as_json}\n"
     else
       raise ActiveRecord::RecordNotFound, "User not found"

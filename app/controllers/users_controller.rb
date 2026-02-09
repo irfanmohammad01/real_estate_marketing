@@ -99,7 +99,7 @@ class UsersController < ApplicationController
   private
 
   def set_user
-    @user = User.find_by!(
+    @user = User.with_deleted.find_by!(
       id: params[:id],
       organization_id: current_user.organization_id
     )
