@@ -211,8 +211,6 @@ GEM
     parser (3.3.10.1)
       ast (~> 2.4.1)
       racc
-    password_generator (1.0.2)
-      rails
     pg (1.6.3)
     pg (1.6.3-aarch64-linux)
     pg (1.6.3-aarch64-linux-musl)
@@ -402,7 +400,6 @@ DEPENDENCIES
   kamal
   kaminari
   paranoia
-  password_generator
   pg (~> 1.5)
   puma (>= 5.0)
   rails (~> 8.1.2)
