@@ -39,6 +39,7 @@ class UsersController < ApplicationController
       user.status = ENV["ORG_USER_STATUS"]
       temporary_password = PasswordGenerator.generate_password(length: 10, uppercase: true, lowercase: true, digits: true, symbols: true)
       user.password = temporary_password
+      user.jti = SecureRandom.uuid
 
       if user.save
         begin
