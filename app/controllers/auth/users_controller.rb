@@ -9,7 +9,8 @@ class Auth::UsersController < ApplicationController
       token = JsonWebToken.encode(
         user_id: user.id,
         role: user.role.name,
-        organization_id: user.organization_id
+        organization_id: user.organization_id,
+        jti: user.jti
       )
 
       render json: {

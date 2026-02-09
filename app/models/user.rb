@@ -19,4 +19,8 @@ class User < ApplicationRecord
   validates :phone, presence: true, length: { is: 10 }
   validates :status, presence: true
   validates :password, presence: true, format: { with: VALID_PASSWORD_REGEX, message: "must include uppercase, lowercase, number, and special character" }, if: -> { password.present? }
+
+  def rotate_jti!
+    update!(jti: SecureRandom.uuid)
+  end
 end

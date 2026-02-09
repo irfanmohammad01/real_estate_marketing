@@ -4,4 +4,8 @@ class SuperUser < ApplicationRecord
   has_secure_password
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { maximum: 100 }, format: { with: VALID_PASSWORD_REGEX, message: "must include uppercase, lowercase, number, and special character" }, if: -> { password.present? }
+
+  def rotate_jti!
+    update!(jti: SecureRandom.uuid)
+  end
 end

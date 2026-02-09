@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_08_113628) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_09_061659) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,6 +34,48 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_113628) do
     t.string "name"
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_bhk_types_on_name", unique: true
+  end
+
+  create_table "campaign_audiences", force: :cascade do |t|
+    t.bigint "audience_id", null: false
+    t.bigint "campaign_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["audience_id"], name: "index_campaign_audiences_on_audience_id"
+    t.index ["campaign_id", "audience_id"], name: "index_campaign_audiences_on_campaign_id_and_audience_id", unique: true
+    t.index ["campaign_id"], name: "index_campaign_audiences_on_campaign_id"
+  end
+
+  create_table "campaign_sends", force: :cascade do |t|
+    t.bigint "campaign_id", null: false
+    t.bigint "contact_id", null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.text "error_message"
+    t.datetime "sent_at"
+    t.string "status", limit: 20, null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id", "contact_id", "created_at"], name: "idx_on_campaign_id_contact_id_created_at_d4b4039caa"
+    t.index ["campaign_id"], name: "index_campaign_sends_on_campaign_id"
+    t.index ["contact_id"], name: "index_campaign_sends_on_contact_id"
+    t.index ["status"], name: "index_campaign_sends_on_status"
+  end
+
+  create_table "campaigns", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "cron_expression"
+    t.bigint "email_template_id", null: false
+    t.datetime "end_date"
+    t.datetime "last_run_at"
+    t.string "name", limit: 150, null: false
+    t.bigint "organization_id", null: false
+    t.bigint "schedule_type_id", null: false
+    t.datetime "scheduled_at"
+    t.string "status", limit: 20, null: false
+    t.datetime "updated_at", null: false
+    t.index ["email_template_id"], name: "index_campaigns_on_email_template_id"
+    t.index ["organization_id"], name: "index_campaigns_on_organization_id"
+    t.index ["schedule_type_id"], name: "index_campaigns_on_schedule_type_id"
   end
 
   create_table "common_email_templates", force: :cascade do |t|
@@ -139,27 +181,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_113628) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "schedule_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", limit: 50, null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_schedule_types_on_name", unique: true
+  end
+
   create_table "super_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email"
+    t.string "jti", null: false
     t.string "password_digest"
     t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_super_users_on_jti", unique: true
   end
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email"
     t.string "full_name"
+    t.string "jti", null: false
     t.bigint "organization_id", null: false
     t.string "password_digest"
     t.string "phone"
     t.bigint "role_id", null: false
     t.string "status"
     t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
     t.index ["role_id"], name: "index_users_on_role_id"
   end
 
+  add_foreign_key "campaign_audiences", "audiences"
+  add_foreign_key "campaign_audiences", "campaigns"
+  add_foreign_key "campaign_sends", "campaigns"
+  add_foreign_key "campaign_sends", "contacts"
+  add_foreign_key "campaigns", "email_templates"
+  add_foreign_key "campaigns", "organizations"
+  add_foreign_key "campaigns", "schedule_types"
   add_foreign_key "email_templates", "email_types"
   add_foreign_key "email_templates", "organizations"
   add_foreign_key "users", "organizations"

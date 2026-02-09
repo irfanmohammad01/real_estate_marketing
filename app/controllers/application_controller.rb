@@ -4,8 +4,6 @@ class ApplicationController < ActionController::API
 
   attr_reader :current_super_user, :current_user
 
-  # Exception handlers - order matters! Most general first, then more specific
-  # Rails checks rescue_from in reverse order (last to first)
   rescue_from StandardError do |e|
     Rails.logger.error "Unexpected error: #{e.class} - #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
@@ -51,8 +49,18 @@ class ApplicationController < ActionController::API
 
     if decoded[:super_user_id]
       @current_super_user = SuperUser.find_by(id: decoded[:super_user_id])
+
+      if @current_super_user && @current_super_user.jti != decoded[:jti]
+        render json: { error: "Token revoked" }, status: :unauthorized
+        return
+      end
     elsif decoded[:user_id]
       @current_user = User.find_by(id: decoded[:user_id])
+
+      if @current_user && @current_user.jti != decoded[:jti]
+        render json: { error: "Token revoked" }, status: :unauthorized
+        return
+      end
     end
 
     unless @current_super_user || @current_user

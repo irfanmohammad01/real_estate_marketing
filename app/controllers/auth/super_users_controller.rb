@@ -6,7 +6,10 @@ class Auth::SuperUsersController < ApplicationController
     super_user = SuperUser.find_by(email: params[:email])
 
     if super_user&.authenticate(params[:password])
-      token = JsonWebToken.encode(super_user_id: super_user.id)
+      token = JsonWebToken.encode(
+        super_user_id: super_user.id,
+        jti: super_user.jti
+      )
 
       render json: {
         token: token,

@@ -14,6 +14,9 @@ Rails.application.routes.draw do
   # user agent login
   post "/auth/login", to: "auth/users#login"
 
+  # logout for all user types
+  delete "/auth/logout", to: "auth/logout#destroy"
+
   # org admin create & update
   namespace :admin do
     resources :org_admins, only: [ :create, :update ]
