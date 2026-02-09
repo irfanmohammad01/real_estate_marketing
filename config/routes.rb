@@ -19,14 +19,20 @@ Rails.application.routes.draw do
 
   # org admin create & update
   namespace :admin do
-    resources :org_admins, only: [ :create, :update ]
+    resources :org_admins, only: [ :create, :update, :destroy ] do
+      post :restore, on: :member
+    end
   end
 
   resources :organizations do
     post :restore, on: :member
+    delete :destroy, on: :member
   end
 
-  resources :users, only: [ :create, :update, :index, :show ]
+  resources :users do
+    post :restore, on: :member
+    delete :destroy, on: :member
+  end
 
 
   resources :email_types, only: [ :create, :index ]

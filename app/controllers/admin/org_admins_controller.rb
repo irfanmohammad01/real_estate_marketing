@@ -2,9 +2,9 @@
 
 class Admin::OrgAdminsController < ApplicationController
   rate_limit(**DEFAULT_RATE_LIMIT, only: [ :create, :update ])
-  before_action :authorize_super_user!, only: [ :create ]
+  before_action :authorize_super_user!, only: [ :create, :destroy, :restore ]
   before_action :authorize_super_or_org_admin!, only: [ :update ]
-  before_action :set_user, only: [ :update ]
+  before_action :set_user, only: [ :update, :destroy, :restore ]
 
   def create
     role = Role.find_by!(name: Role::ROLES[:org_admin])
@@ -29,6 +29,26 @@ class Admin::OrgAdminsController < ApplicationController
       render json: @user.as_json(except: [ :password_digest ]).merge(role_name: @user.role.name, organization_name: @user.organization.name)
     else
       render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    begin
+      @user.destroy
+      render json: { message: "User deleted successfully" }, status: :ok
+    rescue => e
+      Rails.logger.error "Failed to delete user: #{e.message}"
+      render json: { error: "Failed to delete user", message: e.message }, status: :internal_server_error
+    end
+  end
+
+  def restore
+    begin
+      @user.restore
+      render json: { message: "User restored successfully" }, status: :ok
+    rescue => e
+      Rails.logger.error "Failed to restore user: #{e.message}"
+      render json: { error: "Failed to restore user", message: e.message }, status: :internal_server_error
     end
   end
 

@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_action :authorize_org_admin!
-  before_action :set_user, only: [ :update, :show ]
+  before_action :set_user, only: [ :update, :show, :destroy, :restore ]
 
   def index
     begin
@@ -11,6 +11,7 @@ class UsersController < ApplicationController
       render json: users.map { |user|
         {
           id: user.id,
+          name: user.full_name,
           email: user.email,
           role_name: user.role.name,
           organization_name: user.organization.name
@@ -73,6 +74,26 @@ class UsersController < ApplicationController
 
   def show
       render json: @user.as_json(except: [ :password_digest ]).merge(role_name: @user.role.name, organization_name: @user.organization.name)
+  end
+
+  def destroy
+    begin
+      @user.destroy
+      render json: { message: "User deleted successfully" }, status: :ok
+    rescue => e
+      Rails.logger.error "Failed to delete user: #{e.message}"
+      render json: { error: "Failed to delete user", message: e.message }, status: :internal_server_error
+    end
+  end
+
+  def restore
+    begin
+      @user.restore
+      render json: { message: "User restored successfully" }, status: :ok
+    rescue => e
+      Rails.logger.error "Failed to restore user: #{e.message}"
+      render json: { error: "Failed to restore user", message: e.message }, status: :internal_server_error
+    end
   end
 
   private
