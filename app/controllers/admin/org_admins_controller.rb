@@ -13,6 +13,7 @@ class Admin::OrgAdminsController < ApplicationController
     user.status = ENV["ORG_ADMIN_STATUS"]
     temporary_password = PasswordGenerator.generate_password(length: 10, uppercase: true, lowercase: true, digits: true, symbols: true)
     user.password = temporary_password
+    user.jti = SecureRandom.uuid
 
     if user.save
       invitation_link = ENV["INVITATION_LINK"]

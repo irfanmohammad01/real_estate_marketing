@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  organization_id: 1
+  email_template_id: 1
+  status: MyString
+  name: MyString
+  schedule_type_id: 1
+  scheduled_at: 2026-02-09 15:15:38
+  cron_expression: MyText
+  end_date: 2026-02-09 15:15:38
+  last_run_at: 2026-02-09 15:15:38
+
+two:
+  organization_id: 1
+  email_template_id: 1
+  status: MyString
+  name: MyString
+  schedule_type_id: 1
+  scheduled_at: 2026-02-09 15:15:38
+  cron_expression: MyText
+  end_date: 2026-02-09 15:15:38
+  last_run_at: 2026-02-09 15:15:38
