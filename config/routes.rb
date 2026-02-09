@@ -45,6 +45,17 @@ Rails.application.routes.draw do
     end
   end
 
+  # Campaigns
+  resources :campaigns, only: [ :index, :create, :show, :destroy ] do
+    member do
+      post :pause
+      post :resume
+      get :stats
+      get :sends
+    end
+  end
+
+
 
   # Defines the root path route ("/")
   # root "posts#index"
