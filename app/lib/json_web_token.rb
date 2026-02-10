@@ -13,7 +13,8 @@ class JsonWebToken
       HashWithIndifferentAccess.new(body)
     rescue JWT::ExpiredSignature
       raise AuthenticationError, "Token has expired"
-    rescue JWT::DecodeError => e
+    rescue JWT::DecodeError
+      raise AuthenticationError, "Invalid token"
     end
   end
 end
