@@ -10,6 +10,7 @@ class OrganizationsController < ApplicationController
   def index
     begin
       organizations = Organization
+                      .user_accessible
                       .includes(users: :role)
 
       render json: organizations.map { |org|
@@ -181,7 +182,7 @@ class OrganizationsController < ApplicationController
   private
 
   def set_organization
-    @organization = Organization.with_deleted.find(params[:id])
+    @organization = Organization.user_accessible.with_deleted.find(params[:id])
   end
 
   def organization_params

@@ -13,7 +13,6 @@ class Admin::OrgAdminsController < ApplicationController
     user.status = ENV["ORG_ADMIN_STATUS"]
     temporary_password = PasswordGenerator.generate_password(length: 10, uppercase: true, lowercase: true, digits: true, symbols: true)
     user.password = temporary_password
-    user.jti = SecureRandom.uuid
 
     if user.save
       invitation_link = ENV["INVITATION_LINK"]
@@ -56,7 +55,7 @@ class Admin::OrgAdminsController < ApplicationController
   private
 
   def set_user
-    if @current_super_user
+    if @current_user&.superuser?
       @user = User.with_deleted.find_by!(id: params[:id])
     elsif @current_user&.org_admin?
       @user = User.with_deleted.find_by!(id: params[:id], organization_id: @current_user.organization_id)

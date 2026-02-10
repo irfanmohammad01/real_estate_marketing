@@ -4,7 +4,8 @@ class Role < ApplicationRecord
 
   ROLES = {
     org_admin: "ORG_ADMIN",
-    org_user: "ORG_USER"
+    org_user: "ORG_USER",
+    superuser: "SUPERUSER"
   }.freeze
 
   def self.org_admin
@@ -13,5 +14,9 @@ class Role < ApplicationRecord
 
   def self.org_user
     find_by!(name: ROLES[:org_user])
+  end
+
+  def self.superuser
+    find_by!(name: ROLES[:superuser])
   end
 end

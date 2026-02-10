@@ -8,14 +8,13 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # super user login
-  post "/auth/super/login", to: "auth/super_users#login"
-
-  # user agent login
-  post "/auth/login", to: "auth/users#login"
-
-  # logout for all user types
-  delete "/auth/logout", to: "auth/logout#destroy"
+  # Unified login for all user types
+  namespace :auth do
+    post "login", to: "sessions#create"
+    post "super_users/login", to: "super_users#login"  # Backward compatibility
+    post "users/login", to: "users#login"
+    delete "logout", to: "logout#destroy"
+  end
 
   # org admin create & update
   namespace :admin do
@@ -51,6 +50,15 @@ Rails.application.routes.draw do
     collection do
       get :paginated
       post :import
+    end
+  end
+
+  resources :campaigns, only: [ :index, :create, :show, :destroy ] do
+    member do
+      post :pause
+      post :resume
+      get :stats
+      get :sends
     end
   end
 

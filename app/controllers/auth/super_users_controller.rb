@@ -3,19 +3,18 @@ class Auth::SuperUsersController < ApplicationController
   rate_limit(**DEFAULT_RATE_LIMIT, only: [ :login ])
 
   def login
-    super_user = SuperUser.find_by(email: params[:email])
+    user = User.joins(:role)
+               .find_by(email: params[:email], roles: { name: Role::ROLES[:superuser] })
 
-    if super_user&.authenticate(params[:password])
-      token = JsonWebToken.encode(
-        super_user_id: super_user.id,
-        jti: super_user.jti
-      )
+    if user&.authenticate(params[:password])
+      token = JsonWebToken.encode(user_id: user.id)
 
       render json: {
         token: token,
-        super_user: {
-          id: super_user.id,
-          email: super_user.email
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role.name
         }
       }, status: :ok
     else

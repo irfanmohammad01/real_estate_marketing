@@ -2,7 +2,7 @@ class ApplicationController < ActionController::API
   rate_limit(**DEFAULT_RATE_LIMIT)
   before_action :authorize_request
 
-  attr_reader :current_super_user, :current_user
+  attr_reader :current_user
 
   rescue_from StandardError do |e|
     Rails.logger.error "Unexpected error: #{e.class} - #{e.message}"
@@ -47,33 +47,21 @@ class ApplicationController < ActionController::API
       return
     end
 
-    if decoded[:super_user_id]
-      @current_super_user = SuperUser.find_by(id: decoded[:super_user_id])
-
-      if @current_super_user && @current_super_user.jti != decoded[:jti]
-        render json: { error: "Token revoked" }, status: :unauthorized
-        return
-      end
-    elsif decoded[:user_id]
+    if decoded[:user_id]
       @current_user = User.find_by(id: decoded[:user_id])
-
-      if @current_user && @current_user.jti != decoded[:jti]
-        render json: { error: "Token revoked" }, status: :unauthorized
-        return
-      end
     end
 
-    unless @current_super_user || @current_user
+    unless @current_user
       render json: { error: "User not found" }, status: :unauthorized
     end
   end
 
   def authorize_super_user!
-    render json: { error: "Unauthorized" }, status: :unauthorized unless @current_super_user
+    render json: { error: "Unauthorized" }, status: :unauthorized unless @current_user&.superuser?
   end
 
   def authorize_super_or_org_admin!
-    unless @current_super_user || @current_user&.org_admin?
+    unless @current_user&.superuser? || @current_user&.org_admin?
       render json: { error: "Not authorized" }, status: :forbidden
     end
   end

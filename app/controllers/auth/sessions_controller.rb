@@ -1,11 +1,11 @@
-class Auth::UsersController < ApplicationController
-  skip_before_action :authorize_request, only: [ :login ]
-  rate_limit(**DEFAULT_RATE_LIMIT, only: [ :login ])
+class Auth::SessionsController < ApplicationController
+  skip_before_action :authorize_request, only: [ :create ]
+  rate_limit(**DEFAULT_RATE_LIMIT, only: [ :create ])
 
-  def login
-    user = User.includes(:role).find_by(email: user_params[:email])
+  def create
+    user = User.includes(:role, :organization).find_by(email: session_params[:email])
 
-    if user&.authenticate(user_params[:password])
+    if user&.authenticate(session_params[:password])
       token = JsonWebToken.encode(
         user_id: user.id,
         role: user.role.name,
@@ -20,7 +20,7 @@ class Auth::UsersController < ApplicationController
           email: user.email,
           role: user.role.name,
           organization_id: user.organization_id,
-          organization_name: Organization.find(user.organization_id).name
+          organization_name: user.organization.name
         }
       }
     else
@@ -29,7 +29,8 @@ class Auth::UsersController < ApplicationController
   end
 
   private
-  def user_params
+
+  def session_params
     params.permit(:email, :password)
   end
 end
