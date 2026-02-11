@@ -23,7 +23,4 @@ class Audience < ApplicationRecord
     resolved
   end
 
-  def as_json(options = {})
-    
-  end
 end

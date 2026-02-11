@@ -16,7 +16,7 @@ class AudiencesController < ApplicationController
     audience.organization_id = current_user.organization_id
 
     if audience.save
-      render json: audience.except(:created_at, :updated_at, :deleted_at), status: :created
+        render json: audience.as_json(except: [:created_at, :updated_at, :deleted_at]), status: :created
     else
       render json: { errors: audience.errors.full_messages }, status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class AudiencesController < ApplicationController
 
   def update
     if @audience.update(audience_params)
-      render json: audience.except(:created_at, :updated_at, :deleted_at)
+      render json: @audience.as_json(except: [:created_at, :updated_at, :deleted_at]), status: :created
     else
       render json: { errors: @audience.errors.full_messages }, status: :unprocessable_entity
     end
