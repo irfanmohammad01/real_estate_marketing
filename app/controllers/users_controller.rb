@@ -14,7 +14,8 @@ class UsersController < ApplicationController
           name: user.full_name,
           email: user.email,
           role_name: user.role.name,
-          organization_name: user.organization.name
+          organization_name: user.organization.name,
+          phone: user.phone
         }
       }
     rescue => e
@@ -38,6 +39,7 @@ class UsersController < ApplicationController
       user.role = role
       user.organization_id = current_user.organization_id
       user.status = ENV["ORG_USER_STATUS"]
+      #temporary_password = "User@123"
       temporary_password = PasswordGenerator.generate_password(length: 10, uppercase: true, lowercase: true, digits: true, symbols: true)
       user.password = temporary_password
 

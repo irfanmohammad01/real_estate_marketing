@@ -4,7 +4,7 @@ class Auth::UsersController < ApplicationController
 
   def login
     user = User.includes(:role).find_by(email: user_params[:email])
-
+    Rails.logger.info "User found: #{user_params[:password]}"
     if user&.authenticate(user_params[:password])
       token = JsonWebToken.encode(
         user_id: user.id,

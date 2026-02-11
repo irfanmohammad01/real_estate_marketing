@@ -18,7 +18,7 @@ class User < ApplicationRecord
   end
 
 
-  validates :email, presence: true, uniqueness: { scope: :organization_id }, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }, if: -> { email.present? }
+  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }, if: -> { email.present? }
   validates :full_name, presence: true, length: { maximum: 150 }
   validates :phone, presence: true, length: { is: 10 }
   validates :status, presence: true

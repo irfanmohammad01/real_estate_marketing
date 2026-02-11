@@ -97,8 +97,34 @@ class ContactsController < ApplicationController
   end
 
   def index
-    @contacts = Contact.where(organization_id: current_user.organization_id)
-    render json: @contacts
+    page = params[:page].presence || 1
+    per_page = params[:per_page].presence || 25
+
+    contacts = Contact
+                 .eager_load(:preferences)
+                 .where(organization_id: current_user.organization_id)
+
+    filters = params.permit(
+      :bhk_type_id,
+      :furnishing_type_id,
+      :location_id,
+      :power_backup_type_id,
+      :property_type_id
+    ).to_h.reject { |_, v| v.blank? }
+
+    contacts = contacts.where(preferences: filters) if filters.any?
+
+    contacts = contacts.page(page).per(per_page)
+
+    render json: {
+      contacts: contacts.as_json(include: :preferences),
+      pagination: {
+        current_page: contacts.current_page,
+        total_pages: contacts.total_pages,
+        total_count: contacts.total_count,
+        per_page: per_page.to_i
+      }
+    }
   end
 
   private
