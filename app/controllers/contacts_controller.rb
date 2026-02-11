@@ -127,7 +127,7 @@ class ContactsController < ApplicationController
     }
   end
 
-  def send_email
+  def send_emails
     unless params[:email_template_id].present? && params[:emails].present?
       return render json: { error: "email_template_id and emails are required" }, status: :bad_request
     end

@@ -12,23 +12,19 @@ class AudiencesController < ApplicationController
   end
 
   def create
-    preference_ids = Audience.resolve_preference_ids(preference_params)
-
-    audience = Audience.new(audience_params.merge(preference_ids))
+    audience = Audience.new(audience_params)
     audience.organization_id = current_user.organization_id
 
     if audience.save
-      render json: audience, status: :created
+      render json: audience.except(:created_at, :updated_at, :deleted_at), status: :created
     else
       render json: { errors: audience.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def update
-    preference_ids = Audience.resolve_preference_ids(preference_params)
-
-    if @audience.update(audience_params.merge(preference_ids))
-      render json: @audience
+    if @audience.update(audience_params)
+      render json: audience.except(:created_at, :updated_at, :deleted_at)
     else
       render json: { errors: @audience.errors.full_messages }, status: :unprocessable_entity
     end
@@ -59,16 +55,13 @@ class AudiencesController < ApplicationController
   end
 
   def audience_params
-    params.require(:audience).permit(:name)
-  end
-
-  def preference_params
-    params.fetch(:audience, {}).permit(
-      :bhk_type,
-      :furnishing_type,
-      :location,
-      :property_type,
-      :power_backup_type
+    params.require(:audience).permit(
+      :name,
+      :bhk_type_id,
+      :furnishing_type_id,
+      :location_id,
+      :property_type_id,
+      :power_backup_type_id
     )
   end
 end

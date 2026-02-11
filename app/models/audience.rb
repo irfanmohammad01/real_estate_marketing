@@ -8,7 +8,7 @@ class Audience < ApplicationRecord
   belongs_to :property_type, optional: true
   belongs_to :power_backup_type, optional: true
 
-  validates :name, presence: true, length: { maximum: 150 }
+  validates :name, presence: true, uniqueness: { scope: :organization_id, case_sensitive: false }, length: { maximum: 150 }
   validates :organization_id, presence: true
 
   def self.resolve_preference_ids(params)
@@ -23,14 +23,7 @@ class Audience < ApplicationRecord
     resolved
   end
 
-  # Custom JSON output with preference labels instead of IDs
   def as_json(options = {})
-    super(options.merge(except: [ :bhk_type_id, :furnishing_type_id, :location_id, :property_type_id, :power_backup_type_id ])).merge(
-      bhk_type: bhk_type&.name,
-      furnishing_type: furnishing_type&.name,
-      location: location&.city,
-      property_type: property_type&.name,
-      power_backup_type: power_backup_type&.name
-    )
+    
   end
 end
