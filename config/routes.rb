@@ -51,6 +51,7 @@ Rails.application.routes.draw do
     collection do
       get :paginated
       post :import
+      post :send_emails
     end
   end
 

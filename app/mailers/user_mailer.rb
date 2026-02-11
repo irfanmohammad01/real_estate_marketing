@@ -21,6 +21,18 @@ class UserMailer < ApplicationMailer
     end
   end
 
+  def generic_email(email, template)
+    mail(
+      from: format_email(template.from_name, template.from_email),
+      to: email,
+      subject: template.subject,
+      reply_to: template.reply_to
+    ) do |format|
+      format.html { render html: template.html_body.html_safe }
+      format.text { render plain: template.text_body }
+    end
+  end
+
   private
 
   def admin_user?(user)

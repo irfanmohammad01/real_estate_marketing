@@ -127,8 +127,43 @@ class ContactsController < ApplicationController
     }
   end
 
+  def send_email
+    unless params[:email_template_id].present? && params[:emails].present?
+      return render json: { error: "email_template_id and emails are required" }, status: :bad_request
+    end
+
+    email_template = EmailTemplate.find_by(id: params[:email_template_id])
+    unless email_template
+      return render json: { error: "Email template not found" }, status: :not_found
+    end
+
+    if !params[:emails].is_a?(Array)
+       return render json: { error: "Emails must be provided as an array" }, status: :bad_request
+    end
+
+    params[:emails].each do |email|
+      EmailSenderWorker.perform_async(email, email_template.id)
+    end
+
+    render json: { message: "Emails queued for sending successfully" }, status: :ok
+  rescue => e
+    Rails.logger.error "Error in send_email: #{e.message}"
+    render json: { error: "Failed to queue emails", message: e.message }, status: :internal_server_error
+  end
+
+
+
   private
 
+  def send_email_params
+    params.permit(
+      :email_template_id,
+      :email
+    )    
+  end
+
+
+  
   def extract_file_from_raw_body
     multipart_param = params.keys.find { |k| k.include?("Content-Disposition") }
     return nil unless multipart_param
@@ -147,6 +182,9 @@ class ContactsController < ApplicationController
     Rails.logger.error "Manual parsing failed: #{e.message}"
     nil
   end
+
+
+
 
   def contact_params
     params.require(:contact).permit(

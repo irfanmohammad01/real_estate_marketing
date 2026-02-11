@@ -31,6 +31,20 @@ power_backup_types.each do |name|
   PowerBackupType.find_or_create_by!(name: name)
 end
 
+require "securerandom"
+super_user = SuperUser.find_or_initialize_by(email: "super@admin.com")
+super_user.password = "Geek@123"
+super_user.jti = SecureRandom.uuid
+super_user.save!
+
+roles = ["ORG_ADMIN", "ORG_USER"]
+roles.each do |name|
+  Role.find_or_create_by!(name: name)
+end
+
+
+puts "Super user created or updated successfully!"
+
 puts "✅ Reference data seeded successfully!"
 puts "  - #{BhkType.count} BHK Types"
 puts "  - #{FurnishingType.count} Furnishing Types"
