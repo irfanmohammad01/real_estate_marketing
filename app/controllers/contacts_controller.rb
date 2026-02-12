@@ -37,7 +37,6 @@ class ContactsController < ApplicationController
       return
     end
 
-    # Validate file type before saving
     original_filename = uploaded_file.original_filename rescue "unknown"
     file_extension = File.extname(original_filename).downcase
 
@@ -55,7 +54,6 @@ class ContactsController < ApplicationController
 
     File.open(tmp_path, "wb") { |f| f.write(uploaded_file.read) }
 
-    # Perform early validation on headers
     begin
       ContactCsvImportService.send(:validate_csv_file!, File.open(tmp_path))
     rescue ContactCsvImportService::CsvValidationError => e
@@ -72,7 +70,7 @@ class ContactsController < ApplicationController
     render json: { message: "CSV validation passed. Import started successfully." }, status: :accepted
   rescue => e
     Rails.logger.error "Import error: #{e.message}\n#{e.backtrace.join("\n")}"
-    # Clean up temp file on error
+
     File.delete(tmp_path) if tmp_path && File.exist?(tmp_path)
     render json: { error: "Failed to import file", message: e.message }, status: :unprocessable_entity
   end
@@ -142,7 +140,7 @@ class ContactsController < ApplicationController
     end
 
     params[:emails].each do |email|
-      EmailSenderWorker.perform_async(email, email_template.id)
+      EmailSenderWorker.perform_async(email, email_template.id, current_user.organization_id)
     end
 
     render json: { message: "Emails queued for sending successfully" }, status: :ok

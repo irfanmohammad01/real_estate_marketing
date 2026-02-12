@@ -11,5 +11,9 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+    def generate_token(user)
+      payload = { user_id: user.id }
+      JWT.encode(payload, Rails.application.secret_key_base)
+    end
   end
 end

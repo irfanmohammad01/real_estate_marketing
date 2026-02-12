@@ -1,7 +1,7 @@
 require "csv"
 
 class ContactCsvImportService
-  # Required CSV headers
+
   REQUIRED_HEADERS = %w[
     first_name
     last_name
@@ -17,7 +17,7 @@ class ContactCsvImportService
   class CsvValidationError < StandardError; end
 
   def self.call(file, organization_id)
-    # Validate file and headers before processing
+
     validate_csv_file!(file)
 
     success_count = 0
@@ -59,23 +59,20 @@ class ContactCsvImportService
   private
 
   def self.validate_csv_file!(file)
-    # Check if file exists and is readable
+
     unless file.respond_to?(:path) && File.exist?(file.path)
       raise CsvValidationError, "Invalid file or file does not exist"
     end
 
-    # Check file extension
     file_extension = File.extname(file.path).downcase
     unless file_extension == ".csv"
       raise CsvValidationError, "Invalid file type. Only CSV files are allowed. Received: #{file_extension}"
     end
 
-    # Check file is not empty
     if File.zero?(file.path)
       raise CsvValidationError, "CSV file is empty"
     end
 
-    # Validate CSV structure and headers
     begin
       csv_headers = CSV.open(file.path, headers: true, &:first)&.headers
 
@@ -83,10 +80,8 @@ class ContactCsvImportService
         raise CsvValidationError, "CSV file has no headers"
       end
 
-      # Normalize headers (strip whitespace, downcase)
-      csv_headers = csv_headers.map { |h| h&.strip&.downcase }.compact
 
-      # Check for required headers
+      csv_headers = csv_headers.map { |h| h&.strip&.downcase }.compact
       missing_headers = REQUIRED_HEADERS - csv_headers
 
       if missing_headers.any?

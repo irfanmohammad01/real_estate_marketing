@@ -42,6 +42,11 @@ roles.each do |name|
   Role.find_or_create_by!(name: name)
 end
 
+schedule_types = ["one-time", "recurring"]
+schedule_types.each do |name|
+  ScheduleType.find_or_create_by!(name: name)
+end
+
 
 puts "Super user created or updated successfully!"
 

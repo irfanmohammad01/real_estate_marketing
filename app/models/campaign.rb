@@ -29,13 +29,13 @@ class Campaign < ApplicationRecord
   validates :name, presence: true, length: { maximum: 150 }
   validates :status, presence: true, inclusion: { in: VALID_STATUSES }
 
-  validate :scheduled_at_required_for_one_time
-  validate :cron_expression_required_for_recurring
-  validate :end_date_after_scheduled_at
-  validate :validate_cron_expression_format
+  # validate :scheduled_at_required_for_one_time
+  # validate :cron_expression_required_for_recurring
+  # validate :end_date_after_scheduled_at
+  # validate :validate_cron_expression_format
 
   # Callbacks
-  before_validation :set_default_status, on: :create
+  # before_validation :set_default_status, on: :create
 
   # Scopes
   scope :scheduled, -> { where(status: STATUS_SCHEDULED) }
@@ -48,11 +48,11 @@ class Campaign < ApplicationRecord
 
   # Instance methods
   def one_time?
-    schedule_type&.name == ScheduleType::ONE_TIME
+    schedule_type&.name == ScheduleType::SCHEDULE_TYPES[:ONE_TIME]
   end
 
   def recurring?
-    schedule_type&.name == ScheduleType::RECURRING
+    schedule_type&.name == ScheduleType::SCHEDULE_TYPES[:RECURRING]
   end
 
   def can_be_edited?
@@ -119,45 +119,45 @@ class Campaign < ApplicationRecord
 
   private
 
-  def set_default_status
-    self.status ||= STATUS_SCHEDULED
-  end
+  # def set_default_status
+  #   self.status ||= STATUS_SCHEDULED
+  # end
 
-  def scheduled_at_required_for_one_time
-    if one_time? && scheduled_at.blank?
-      errors.add(:scheduled_at, "is required for one-time campaigns")
-    end
-  end
+  # def scheduled_at_required_for_one_time
+  #   if one_time? && scheduled_at.blank?
+  #     errors.add(:scheduled_at, "is required for one-time campaigns")
+  #   end
+  # end
 
-  def cron_expression_required_for_recurring
-    if recurring? && cron_expression.blank?
-      errors.add(:cron_expression, "is required for recurring campaigns")
-    end
-  end
+  # def cron_expression_required_for_recurring
+  #   if recurring? && cron_expression.blank?
+  #     errors.add(:cron_expression, "is required for recurring campaigns")
+  #   end
+  # end
 
-  def end_date_after_scheduled_at
-    if scheduled_at.present? && end_date.present? && end_date <= scheduled_at
-      errors.add(:end_date, "must be after scheduled time")
-    end
-  end
+  # def end_date_after_scheduled_at
+  #   if scheduled_at.present? && end_date.present? && end_date <= scheduled_at
+  #     errors.add(:end_date, "must be after scheduled time")
+  #   end
+  # end
 
-  def validate_cron_expression_format
-    return unless recurring? && cron_expression.present?
+  # def validate_cron_expression_format
+  #   return unless recurring? && cron_expression.present?
 
-    begin
-      require "fugit"
-      Fugit.parse_cron(cron_expression)
-    rescue => e
-      errors.add(:cron_expression, "is not a valid cron expression: #{e.message}")
-    end
-  end
+  #   begin
+  #     require "fugit"
+  #     Fugit.parse_cron(cron_expression)
+  #   rescue => e
+  #     errors.add(:cron_expression, "is not a valid cron expression: #{e.message}")
+  #   end
+  # end
 
-  def parse_cron_next_time(from_time)
-    require "fugit"
-    cron = Fugit.parse_cron(cron_expression)
-    cron&.next_time(from_time)&.to_time
-  rescue => e
-    Rails.logger.error "Error parsing cron expression: #{e.message}"
-    nil
-  end
+  # def parse_cron_next_time(from_time)
+  #   require "fugit"
+  #   cron = Fugit.parse_cron(cron_expression)
+  #   cron&.next_time(from_time)&.to_time
+  # rescue => e
+  #   Rails.logger.error "Error parsing cron expression: #{e.message}"
+  #   nil
+  # end
 end

@@ -55,6 +55,11 @@ Rails.application.routes.draw do
     end
   end
 
+  # Campaigns
+  resources :campaigns, only: [ :create, :index, :update, :destroy ] do
+    post :send_email_to_audience, on: :collection
+  end
+
 
   # Defines the root path route ("/")
   # root "posts#index"
