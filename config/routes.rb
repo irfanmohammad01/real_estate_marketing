@@ -51,7 +51,13 @@ Rails.application.routes.draw do
     collection do
       get :paginated
       post :import
+      post :send_emails
     end
+  end
+
+  # Campaigns
+  resources :campaigns, only: [ :create, :index, :update, :destroy ] do
+    post :send_email_to_audience, on: :collection
   end
 
 

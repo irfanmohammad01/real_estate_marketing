@@ -2,7 +2,7 @@ class EmailTemplate < ApplicationRecord
   belongs_to :organization
   belongs_to :email_type
 
-  validates :name, presence: true, length: { maximum: 150 }
+  validates :name, presence: true, uniqueness: { scope: :organization_id }, length: { maximum: 150 }
   validates :subject, presence: true, length: { maximum: 255 }
   validates :preheader, presence: true, length: { maximum: 255 }
   validates :from_name, presence: true, length: { maximum: 150 }

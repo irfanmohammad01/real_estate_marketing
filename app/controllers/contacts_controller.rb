@@ -37,7 +37,6 @@ class ContactsController < ApplicationController
       return
     end
 
-    # Validate file type before saving
     original_filename = uploaded_file.original_filename rescue "unknown"
     file_extension = File.extname(original_filename).downcase
 
@@ -55,7 +54,6 @@ class ContactsController < ApplicationController
 
     File.open(tmp_path, "wb") { |f| f.write(uploaded_file.read) }
 
-    # Perform early validation on headers
     begin
       ContactCsvImportService.send(:validate_csv_file!, File.open(tmp_path))
     rescue ContactCsvImportService::CsvValidationError => e
@@ -72,7 +70,7 @@ class ContactsController < ApplicationController
     render json: { message: "CSV validation passed. Import started successfully." }, status: :accepted
   rescue => e
     Rails.logger.error "Import error: #{e.message}\n#{e.backtrace.join("\n")}"
-    # Clean up temp file on error
+
     File.delete(tmp_path) if tmp_path && File.exist?(tmp_path)
     render json: { error: "Failed to import file", message: e.message }, status: :unprocessable_entity
   end
@@ -127,8 +125,43 @@ class ContactsController < ApplicationController
     }
   end
 
+  def send_emails
+    unless params[:email_template_id].present? && params[:emails].present?
+      return render json: { error: "email_template_id and emails are required" }, status: :bad_request
+    end
+
+    email_template = EmailTemplate.find_by(id: params[:email_template_id])
+    unless email_template
+      return render json: { error: "Email template not found" }, status: :not_found
+    end
+
+    if !params[:emails].is_a?(Array)
+       return render json: { error: "Emails must be provided as an array" }, status: :bad_request
+    end
+
+    params[:emails].each do |email|
+      EmailSenderWorker.perform_async(email, email_template.id, current_user.organization_id)
+    end
+
+    render json: { message: "Emails queued for sending successfully" }, status: :ok
+  rescue => e
+    Rails.logger.error "Error in send_email: #{e.message}"
+    render json: { error: "Failed to queue emails", message: e.message }, status: :internal_server_error
+  end
+
+
+
   private
 
+  def send_email_params
+    params.permit(
+      :email_template_id,
+      :email
+    )    
+  end
+
+
+  
   def extract_file_from_raw_body
     multipart_param = params.keys.find { |k| k.include?("Content-Disposition") }
     return nil unless multipart_param
@@ -147,6 +180,9 @@ class ContactsController < ApplicationController
     Rails.logger.error "Manual parsing failed: #{e.message}"
     nil
   end
+
+
+
 
   def contact_params
     params.require(:contact).permit(
