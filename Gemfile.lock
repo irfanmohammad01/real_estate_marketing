@@ -98,6 +98,7 @@ GEM
     debug (1.11.1)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    diff-lcs (1.6.2)
     dotenv (3.2.0)
     dotenv-rails (3.2.0)
       dotenv (= 3.2.0)
@@ -279,11 +280,21 @@ GEM
       io-console (~> 0.5)
     rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.7)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-rails (8.0.2)
+      actionpack (>= 7.2)
+      activesupport (>= 7.2)
+      railties (>= 7.2)
+      rspec-core (~> 3.13)
+      rspec-expectations (~> 3.13)
+      rspec-mocks (~> 3.13)
+      rspec-support (~> 3.13)
     rspec-support (3.13.7)
-    rswag (2.17.0)
-      rswag-api (= 2.17.0)
-      rswag-specs (= 2.17.0)
-      rswag-ui (= 2.17.0)
     rswag-api (2.17.0)
       activesupport (>= 5.2, < 8.2)
       railties (>= 5.2, < 8.2)
@@ -403,7 +414,10 @@ DEPENDENCIES
   pg (~> 1.5)
   puma (>= 5.0)
   rails (~> 8.1.2)
-  rswag
+  rspec-rails
+  rswag-api
+  rswag-specs
+  rswag-ui
   rubocop-rails-omakase
   sidekiq
   solid_cable

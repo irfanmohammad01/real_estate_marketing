@@ -16,12 +16,12 @@ RSpec.describe 'Users API', type: :request do
       end
 
       response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/UnauthorizedErrorResponse'
         run_test! false
       end
 
       response '403', 'forbidden' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/ForbiddenErrorResponse'
         run_test! false
       end
     end
@@ -49,17 +49,17 @@ RSpec.describe 'Users API', type: :request do
       end
 
       response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/UnauthorizedErrorResponse'
         run_test! false
       end
 
       response '403', 'forbidden' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/ForbiddenErrorResponse'
         run_test! false
       end
 
       response '422', 'validation failed' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/ValidationErrorResponse'
         run_test! false
       end
     end
@@ -80,17 +80,17 @@ RSpec.describe 'Users API', type: :request do
       end
 
       response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/UnauthorizedErrorResponse'
         run_test! false
       end
 
       response '403', 'forbidden' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/ForbiddenErrorResponse'
         run_test! false
       end
 
       response '404', 'not found' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/NotFoundErrorResponse'
         run_test! false
       end
     end
@@ -116,17 +116,17 @@ RSpec.describe 'Users API', type: :request do
       end
 
       response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/UnauthorizedErrorResponse'
         run_test! false
       end
 
       response '403', 'forbidden' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/ForbiddenErrorResponse'
         run_test! false
       end
 
       response '422', 'validation failed' do
-        schema '$ref' => '#/components/schemas/ErrorResponse'
+        schema '$ref' => '#/components/schemas/ValidationErrorResponse'
         run_test! false
       end
     end
