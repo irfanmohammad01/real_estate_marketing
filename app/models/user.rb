@@ -6,7 +6,7 @@ class User < ApplicationRecord
   belongs_to :role
   has_secure_password
 
-  # Callbacks
+
   before_create :generate_jti
 
   def org_admin?
@@ -18,7 +18,7 @@ class User < ApplicationRecord
   end
 
 
-  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }, if: -> { email.present? }
+  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }
   validates :full_name, presence: true, length: { maximum: 150 }
   validates :phone, presence: true, length: { is: 10 }
   validates :status, presence: true

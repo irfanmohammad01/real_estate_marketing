@@ -26,7 +26,7 @@ class Campaign < ApplicationRecord
   validates :organization_id, presence: true
   validates :email_template_id, presence: true
   validates :schedule_type_id, presence: true
-  validates :name, presence: true, length: { maximum: 150 }
+  validates :name, presence: true, uniqueness: { scope: :organization_id }, length: { maximum: 150 }
   validates :status, presence: true, inclusion: { in: VALID_STATUSES }
 
   # validate :scheduled_at_required_for_one_time

@@ -13,7 +13,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
       password: "Password@123",
       role: @admin_role,
       organization: @organization,
-      status: "ACTIVE"
+      status: "ACTIVE",
+      jti: SecureRandom.uuid
     )
 
     @user = User.create!(
@@ -98,6 +99,5 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get user_url(other_user), headers: @headers
     assert_response :not_found
   end
-
   end
 end

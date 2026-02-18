@@ -1,5 +1,6 @@
 class ContactCsvImportWorker
   include Sidekiq::Worker
+  sidekiq_options queue: "high_priority"
 
   def perform(file_path, organization_id)
     Rails.logger.info "[ContactCsvImportWorker] Starting import for organization #{organization_id}"

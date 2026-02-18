@@ -126,23 +126,20 @@ class ContactsController < ApplicationController
   end
 
   def send_emails
-    unless params[:email_template_id].present? && params[:emails].present?
+    unless send_email_params[:email_template_id].present? && send_email_params[:emails].present?
       return render json: { error: "email_template_id and emails are required" }, status: :bad_request
     end
 
-    email_template = EmailTemplate.find_by(id: params[:email_template_id])
+    email_template = EmailTemplate.find_by(id: send_email_params[:email_template_id])
     unless email_template
       return render json: { error: "Email template not found" }, status: :not_found
     end
 
-    if !params[:emails].is_a?(Array)
+    if !send_email_params[:emails].is_a?(Array)
        return render json: { error: "Emails must be provided as an array" }, status: :bad_request
     end
 
-    params[:emails].each do |email|
-      EmailSenderWorker.perform_async(email, email_template.id, current_user.organization_id)
-    end
-
+    EmailSenderWorker.perform_async(send_email_params[:emails], email_template.id, current_user.organization_id)
     render json: { message: "Emails queued for sending successfully" }, status: :ok
   rescue => e
     Rails.logger.error "Error in send_email: #{e.message}"
@@ -156,12 +153,12 @@ class ContactsController < ApplicationController
   def send_email_params
     params.permit(
       :email_template_id,
-      :email
-    )    
+      :emails
+    )
   end
 
 
-  
+
   def extract_file_from_raw_body
     multipart_param = params.keys.find { |k| k.include?("Content-Disposition") }
     return nil unless multipart_param
@@ -180,9 +177,6 @@ class ContactsController < ApplicationController
     Rails.logger.error "Manual parsing failed: #{e.message}"
     nil
   end
-
-
-
 
   def contact_params
     params.require(:contact).permit(

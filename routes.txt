@@ -1,0 +1,84 @@
+Routes for application:
+                                  Prefix Verb   URI Pattern                                                                                       Controller#Action
+                                rswag_ui        /api-docs                                                                                         Rswag::Ui::Engine
+                               rswag_api        /api-docs                                                                                         Rswag::Api::Engine
+                      rails_health_check GET    /up(.:format)                                                                                     rails/health#show
+                        auth_super_login POST   /auth/super/login(.:format)                                                                       auth/super_users#login
+                              auth_login POST   /auth/login(.:format)                                                                             auth/users#login
+                             auth_logout DELETE /auth/logout(.:format)                                                                            auth/logout#destroy
+                 restore_admin_org_admin POST   /admin/org_admins/:id/restore(.:format)                                                           admin/org_admins#restore
+                        admin_org_admins POST   /admin/org_admins(.:format)                                                                       admin/org_admins#create
+                         admin_org_admin PATCH  /admin/org_admins/:id(.:format)                                                                   admin/org_admins#update
+                                         PUT    /admin/org_admins/:id(.:format)                                                                   admin/org_admins#update
+                                         DELETE /admin/org_admins/:id(.:format)                                                                   admin/org_admins#destroy
+                    restore_organization POST   /organizations/:id/restore(.:format)                                                              organizations#restore
+                            organization DELETE /organizations/:id(.:format)                                                                      organizations#destroy
+                           organizations GET    /organizations(.:format)                                                                          organizations#index
+                                         POST   /organizations(.:format)                                                                          organizations#create
+                                         GET    /organizations/:id(.:format)                                                                      organizations#show
+                                         PATCH  /organizations/:id(.:format)                                                                      organizations#update
+                                         PUT    /organizations/:id(.:format)                                                                      organizations#update
+                                         DELETE /organizations/:id(.:format)                                                                      organizations#destroy
+                            restore_user POST   /users/:id/restore(.:format)                                                                      users#restore
+                                    user DELETE /users/:id(.:format)                                                                              users#destroy
+                                   users GET    /users(.:format)                                                                                  users#index
+                                         POST   /users(.:format)                                                                                  users#create
+                                         GET    /users/:id(.:format)                                                                              users#show
+                                         PATCH  /users/:id(.:format)                                                                              users#update
+                                         PUT    /users/:id(.:format)                                                                              users#update
+                                         DELETE /users/:id(.:format)                                                                              users#destroy
+                             email_types GET    /email_types(.:format)                                                                            email_types#index
+                                         POST   /email_types(.:format)                                                                            email_types#create
+                         email_templates GET    /email_templates(.:format)                                                                        email_templates#index
+                                         POST   /email_templates(.:format)                                                                        email_templates#create
+                          email_template GET    /email_templates/:id(.:format)                                                                    email_templates#show
+                                         PATCH  /email_templates/:id(.:format)                                                                    email_templates#update
+                                         PUT    /email_templates/:id(.:format)                                                                    email_templates#update
+                             preferences GET    /preferences(.:format)                                                                            preferences#index
+                        restore_audience POST   /audiences/:id/restore(.:format)                                                                  audiences#restore
+                               audiences GET    /audiences(.:format)                                                                              audiences#index
+                                         POST   /audiences(.:format)                                                                              audiences#create
+                                audience GET    /audiences/:id(.:format)                                                                          audiences#show
+                                         PATCH  /audiences/:id(.:format)                                                                          audiences#update
+                                         PUT    /audiences/:id(.:format)                                                                          audiences#update
+                                         DELETE /audiences/:id(.:format)                                                                          audiences#destroy
+                      paginated_contacts GET    /contacts/paginated(.:format)                                                                     contacts#paginated
+                         import_contacts POST   /contacts/import(.:format)                                                                        contacts#import
+                    send_emails_contacts POST   /contacts/send_emails(.:format)                                                                   contacts#send_emails
+                                contacts GET    /contacts(.:format)                                                                               contacts#index
+                                         POST   /contacts(.:format)                                                                               contacts#create
+        send_email_to_audience_campaigns POST   /campaigns/send_email_to_audience(.:format)                                                       campaigns#send_email_to_audience
+                               campaigns GET    /campaigns(.:format)                                                                              campaigns#index
+                                         POST   /campaigns(.:format)                                                                              campaigns#create
+                                campaign PATCH  /campaigns/:id(.:format)                                                                          campaigns#update
+                                         PUT    /campaigns/:id(.:format)                                                                          campaigns#update
+                                         DELETE /campaigns/:id(.:format)                                                                          campaigns#destroy
+           rails_postmark_inbound_emails POST   /rails/action_mailbox/postmark/inbound_emails(.:format)                                           action_mailbox/ingresses/postmark/inbound_emails#create
+              rails_relay_inbound_emails POST   /rails/action_mailbox/relay/inbound_emails(.:format)                                              action_mailbox/ingresses/relay/inbound_emails#create
+           rails_sendgrid_inbound_emails POST   /rails/action_mailbox/sendgrid/inbound_emails(.:format)                                           action_mailbox/ingresses/sendgrid/inbound_emails#create
+     rails_mandrill_inbound_health_check GET    /rails/action_mailbox/mandrill/inbound_emails(.:format)                                           action_mailbox/ingresses/mandrill/inbound_emails#health_check
+           rails_mandrill_inbound_emails POST   /rails/action_mailbox/mandrill/inbound_emails(.:format)                                           action_mailbox/ingresses/mandrill/inbound_emails#create
+            rails_mailgun_inbound_emails POST   /rails/action_mailbox/mailgun/inbound_emails/mime(.:format)                                       action_mailbox/ingresses/mailgun/inbound_emails#create
+          rails_conductor_inbound_emails GET    /rails/conductor/action_mailbox/inbound_emails(.:format)                                          rails/conductor/action_mailbox/inbound_emails#index
+                                         POST   /rails/conductor/action_mailbox/inbound_emails(.:format)                                          rails/conductor/action_mailbox/inbound_emails#create
+       new_rails_conductor_inbound_email GET    /rails/conductor/action_mailbox/inbound_emails/new(.:format)                                      rails/conductor/action_mailbox/inbound_emails#new
+           rails_conductor_inbound_email GET    /rails/conductor/action_mailbox/inbound_emails/:id(.:format)                                      rails/conductor/action_mailbox/inbound_emails#show
+new_rails_conductor_inbound_email_source GET    /rails/conductor/action_mailbox/inbound_emails/sources/new(.:format)                              rails/conductor/action_mailbox/inbound_emails/sources#new
+   rails_conductor_inbound_email_sources POST   /rails/conductor/action_mailbox/inbound_emails/sources(.:format)                                  rails/conductor/action_mailbox/inbound_emails/sources#create
+   rails_conductor_inbound_email_reroute POST   /rails/conductor/action_mailbox/:inbound_email_id/reroute(.:format)                               rails/conductor/action_mailbox/reroutes#create
+rails_conductor_inbound_email_incinerate POST   /rails/conductor/action_mailbox/:inbound_email_id/incinerate(.:format)                            rails/conductor/action_mailbox/incinerates#create
+                      rails_service_blob GET    /rails/active_storage/blobs/redirect/:signed_id/*filename(.:format)                               active_storage/blobs/redirect#show
+                rails_service_blob_proxy GET    /rails/active_storage/blobs/proxy/:signed_id/*filename(.:format)                                  active_storage/blobs/proxy#show
+                                         GET    /rails/active_storage/blobs/:signed_id/*filename(.:format)                                        active_storage/blobs/redirect#show
+               rails_blob_representation GET    /rails/active_storage/representations/redirect/:signed_blob_id/:variation_key/*filename(.:format) active_storage/representations/redirect#show
+         rails_blob_representation_proxy GET    /rails/active_storage/representations/proxy/:signed_blob_id/:variation_key/*filename(.:format)    active_storage/representations/proxy#show
+                                         GET    /rails/active_storage/representations/:signed_blob_id/:variation_key/*filename(.:format)          active_storage/representations/redirect#show
+                      rails_disk_service GET    /rails/active_storage/disk/:encoded_key/*filename(.:format)                                       active_storage/disk#show
+               update_rails_disk_service PUT    /rails/active_storage/disk/:encoded_token(.:format)                                               active_storage/disk#update
+                    rails_direct_uploads POST   /rails/active_storage/direct_uploads(.:format)                                                    active_storage/direct_uploads#create
+
+Routes for Rswag::Ui::Engine:
+No routes defined.
+
+Routes for Rswag::Api::Engine:
+No routes defined.

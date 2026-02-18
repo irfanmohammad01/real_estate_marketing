@@ -4,11 +4,11 @@ class CampaignsController < ApplicationController
 
   def index
     @campaigns = Campaign.all
-    render json: @campaigns.as_json(except: [:updated_at, :deleted_at]), status: :ok
+    render json: @campaigns.as_json(except: [ :updated_at, :deleted_at ]), status: :ok
   end
 
   def create
-    @campaign = Campaign.new(params.permit(:name, :email_template_id, :scheduled_at))
+    @campaign = Campaign.new(campaign_params)
     audience_id = params[:audience_id]
     @campaign.organization_id = current_user.organization_id
     @campaign.schedule_type_id = ScheduleType.find_by(name: ScheduleType::SCHEDULE_TYPES[:ONE_TIME])&.id
@@ -19,16 +19,15 @@ class CampaignsController < ApplicationController
         @campaign.email_template_id,
         @campaign.scheduled_at
       )
-      render json: @campaign.as_json(except: [:updated_at, :deleted_at]), status: :created
+      render json: @campaign.as_json(except: [ :updated_at, :deleted_at ]), status: :created
     else
       render json: { errors: @campaign.errors.full_messages }, status: :unprocessable_entity
     end
-
   end
 
   def update
-    if @campaign.update(campaign_update_params)
-      render json: @campaign.as_json(except: [:updated_at, :deleted_at]), status: :ok
+    if @campaign.update(campaign_params)
+      render json: @campaign.as_json(except: [ :updated_at, :deleted_at ]), status: :ok
     else
       render json: { errors: @campaign.errors.full_messages }, status: :unprocessable_entity
     end
@@ -41,9 +40,9 @@ class CampaignsController < ApplicationController
 
   def send_email_to_audience
     result = process_email_to_audience(
-      params[:audience_id],
-      params[:email_template_id],
-      Time.zone.parse(params[:scheduled_at]))
+      send_email_to_audience_params[:audience_id],
+      send_email_to_audience_params[:email_template_id],
+      Time.zone.parse(send_email_to_audience_params[:scheduled_at]))
 
     if result[:error]
       render json: { error: result[:error] }, status: :not_found
@@ -52,18 +51,16 @@ class CampaignsController < ApplicationController
     end
   end
 
-  
-  
   private
 
-  def process_email_to_audience(audience_id, email_template_id, scheduled_at=nil)
+  def process_email_to_audience(audience_id, email_template_id, scheduled_at = nil)
     audience = Audience.find_by(id: audience_id, organization_id: current_user.organization_id)
     unless audience
       return { error: "Audience not found" }
     end
-  
+
     matching_contracts = Contact.joins(:preferences).where(organization_id: current_user.organization_id).distinct
-    
+
     conditions = []
     conditions << "preferences.bhk_type_id = #{audience.bhk_type_id}" if audience.bhk_type_id
     conditions << "preferences.furnishing_type_id = #{audience.furnishing_type_id}" if audience.furnishing_type_id
@@ -71,14 +68,9 @@ class CampaignsController < ApplicationController
     conditions << "preferences.property_type_id = #{audience.property_type_id}" if audience.property_type_id
     conditions << "preferences.power_backup_type_id = #{audience.power_backup_type_id}" if audience.power_backup_type_id
 
-    # Rails.logger.info("\nConditions:\n#{conditions.join("\n")}")
-    # Rails.logger.info("\nmatching_contracts:\n#{matching_contracts.pluck(:email).join("\n")}")
-    
     if conditions.any?
       matching_contracts = matching_contracts.where(conditions.join(" OR "))
     end
-    
-    # Rails.logger.info("\nmatching_contracts updated: \n#{matching_contracts.pluck(:email).join("\n")}")
     count = 0
     matching_contracts.find_each do |contact|
       if scheduled_at.present?
@@ -90,15 +82,19 @@ class CampaignsController < ApplicationController
     end
 
     { count: count }
-  end 
-  
+  end
+
+  def send_email_to_audience_params
+    params.permit(:audience_id, :email_template_id, :scheduled_at)
+  end
+
 
   def set_campaign
     @campaign = Campaign.find(params[:id])
   end
 
 
-  def campaign_update_params
+  def campaign_params
     params.permit(:name, :email_template_id, :scheduled_at)
   end
 end
