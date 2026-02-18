@@ -178,6 +178,9 @@ class ContactsController < ApplicationController
     nil
   end
 
+
+
+
   def contact_params
     params.require(:contact).permit(
       :first_name,
