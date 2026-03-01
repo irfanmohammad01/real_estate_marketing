@@ -1,5 +1,4 @@
 class ScheduleType < ApplicationRecord
-
   SCHEDULE_TYPES = {
     ONE_TIME: "one-time",
     RECURRING: "recurring"

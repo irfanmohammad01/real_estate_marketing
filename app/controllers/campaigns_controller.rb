@@ -4,7 +4,9 @@ class CampaignsController < ApplicationController
 
   def index
     @campaigns = Campaign.all
-    render json: @campaigns.as_json(except: [ :updated_at, :deleted_at ]), status: :ok
+    if stale?(@campaigns)
+      render json: @campaigns.as_json(except: [ :updated_at, :deleted_at ])
+    end
   end
 
   def create
