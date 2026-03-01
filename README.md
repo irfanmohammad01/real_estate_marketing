@@ -28,15 +28,14 @@ bundle install
 ```
 
 ### 3. Database Setup
-Ensure PostgreSQL is running, then create, migrate, and seed the database:
+Ensure PostgreSQL is running, then create, migrate, and seed the databases (including the SQLite cache database):
 ```bash
-rails db:create
-rails db:migrate
+rails db:prepare
 rails db:seed
 ```
 
 ### 4. Environment Variables
-Verify if you need to set up a `.env` file for any local configuration (e.g., database credentials, JWT secret keys, etc.).
+Verify if you need to set up a `.env` file for any local configuration.
 
 ### 5. Start the Rails Server
 ```bash
