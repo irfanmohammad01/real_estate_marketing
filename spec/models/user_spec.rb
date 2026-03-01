@@ -9,7 +9,7 @@ RSpec.describe User, type: :model do
     user = User.new(full_name: "John Doe", email: "john@example.com", phone: "1234567890", status: "active", password: "Password@123", organization: organization, role: role)
     expect(user).to be_valid
   end
-  
+
   it "is invalid without a full_name" do
     user = User.new(email: "john@example.com", phone: "1234567890", status: "active", password: "Password@123", organization: organization, role: role)
     expect(user).not_to be_valid
@@ -39,7 +39,7 @@ RSpec.describe User, type: :model do
     user = User.new(full_name: "John Doe", email: "john@example.com", phone: "1234567890", status: "active", password: "Password", organization: organization, role: role)
     expect(user).not_to be_valid
   end
-  
+
   it "is invalid with a wrong email" do
     user = User.new(full_name: "John Doe", email: "john@@example.com", phone: "1234567890", status: "active", password: "Password@123", organization: organization, role: role)
     expect(user).not_to be_valid

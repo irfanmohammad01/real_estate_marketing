@@ -22,5 +22,4 @@ class Audience < ApplicationRecord
 
     resolved
   end
-
 end

@@ -34,7 +34,7 @@ RSpec.describe UserMailer, type: :mailer do
 
       it "renders the headers" do
         expect(mail.subject).to eq("You have been invited as an Admin!")
-        expect(mail.to).to eq([admin_user.email])
+        expect(mail.to).to eq([ admin_user.email ])
         expect(mail.from).to include(ENV.fetch("GMAIL_USERNAME"))
       end
 
@@ -50,7 +50,7 @@ RSpec.describe UserMailer, type: :mailer do
 
       it "renders the headers" do
         expect(mail.subject).to eq("You have been invited as an Agent!")
-        expect(mail.to).to eq([normal_user.email])
+        expect(mail.to).to eq([ normal_user.email ])
         expect(mail.from).to include(ENV.fetch("GMAIL_USERNAME"))
       end
 

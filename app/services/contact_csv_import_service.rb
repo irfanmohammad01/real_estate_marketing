@@ -1,7 +1,6 @@
 require "csv"
 
 class ContactCsvImportService
-
   REQUIRED_HEADERS = %w[
     first_name
     last_name
@@ -17,49 +16,78 @@ class ContactCsvImportService
   class CsvValidationError < StandardError; end
 
   def self.call(file, organization_id)
-
     validate_csv_file!(file)
 
-    success_count = 0
-    error_count = 0
+    contacts_data = []
+    preferences_data = []
     errors = []
+    batch_size = 1000
+    success_count = 0
 
-    CSV.foreach(file.path, headers: true) do |row|
+    bhk_types = BhkType.pluck(:name, :id).to_h
+    furnishing_types = FurnishingType.pluck(:name, :id).to_h
+    locations = Location.pluck(:city, :id).to_h
+    property_types = PropertyType.pluck(:name, :id).to_h
+    power_backup_types = PowerBackupType.pluck(:name, :id).to_h
+
+    CSV.foreach(file.path, headers: true).with_index do |row, index|
       begin
-        contact = Contact.create!(
+        contacts_data << {
           organization_id: organization_id,
           first_name: row["first_name"],
           last_name: row["last_name"],
           email: row["email"],
           phone: row["phone"]
-        )
+        }
 
-        Preference.create!(
-          contact_id: contact.id,
-          bhk_type_id: BhkType.find_by(name: row["bhk_type"])&.id,
-          furnishing_type_id: FurnishingType.find_by(name: row["furnishing_type"])&.id,
-          location_id: Location.find_by(city: row["location"])&.id,
-          property_type_id: PropertyType.find_by(name: row["property_type"])&.id,
-          power_backup_type_id: PowerBackupType.find_by(name: row["power_backup_type"])&.id
-        )
+        preferences_data << {
+          bhk_type_id: bhk_types[row["bhk_type"]],
+          furnishing_type_id: furnishing_types[row["furnishing_type"]],
+          location_id: locations[row["location"]],
+          property_type_id: property_types[row["property_type"]],
+          power_backup_type_id: power_backup_types[row["power_backup_type"]]
+        }
 
-        success_count += 1
+        if contacts_data.size >= batch_size
+          insert_batch(contacts_data, preferences_data)
+          success_count += contacts_data.size
+          contacts_data.clear
+          preferences_data.clear
+        end
+
       rescue => e
-        error_count += 1
-        error_msg = "Row (#{row['email']}): #{e.message}"
-        Rails.logger.error "CSV Import Error: #{error_msg}"
-        errors << error_msg
+        errors << "Row (#{row['email']}): #{e.message}"
       end
     end
 
-    Rails.logger.info "CSV Import Complete: #{success_count} successful, #{error_count} errors"
-    { success_count: success_count, error_count: error_count, errors: errors }
+    if contacts_data.any?
+      insert_batch(contacts_data, preferences_data)
+    end
+
+    {
+      success_count: success_count,
+      error_count: errors.size,
+      errors: errors
+    }
+  end
+
+  def self.insert_batch(contacts_data, preferences_data)
+    ActiveRecord::Base.transaction do
+      inserted_contacts = Contact.insert_all!(contacts_data, returning: %w[id])
+
+      inserted_ids = inserted_contacts.rows.flatten
+
+      preferences_data.each_with_index do |pref, index|
+        pref[:contact_id] = inserted_ids[index]
+      end
+
+      Preference.insert_all!(preferences_data)
+    end
   end
 
   private
 
   def self.validate_csv_file!(file)
-
     unless file.respond_to?(:path) && File.exist?(file.path)
       raise CsvValidationError, "Invalid file or file does not exist"
     end

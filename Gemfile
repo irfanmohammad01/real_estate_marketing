@@ -4,6 +4,7 @@ source "https://rubygems.org"
 gem "rails", "~> 8.1.2"
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.5"
+gem "sqlite3", "~> 2.9"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
@@ -46,16 +47,16 @@ gem "csv"
 
 gem "kaminari"
 
-gem 'rswag-api'
-gem 'rswag-ui'
-gem 'rswag-specs'
+gem "rswag-api"
+gem "rswag-ui"
+gem "rswag-specs"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
   gem "dotenv-rails"
-  gem 'rspec-rails'
+  gem "rspec-rails"
 
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
   gem "bundler-audit", require: false

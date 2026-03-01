@@ -25,15 +25,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.integer "power_backup_type_id"
     t.integer "property_type_id"
     t.datetime "updated_at", null: false
-    t.index ["deleted_at"], name: "index_audiences_on_deleted_at"
-    t.index ["organization_id"], name: "index_audiences_on_organization_id"
+    t.index [ "deleted_at" ], name: "index_audiences_on_deleted_at"
+    t.index [ "organization_id" ], name: "index_audiences_on_organization_id"
   end
 
   create_table "bhk_types", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_bhk_types_on_name", unique: true
+    t.index [ "name" ], name: "index_bhk_types_on_name", unique: true
   end
 
   create_table "campaign_audiences", force: :cascade do |t|
@@ -41,9 +41,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.bigint "campaign_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["audience_id"], name: "index_campaign_audiences_on_audience_id"
-    t.index ["campaign_id", "audience_id"], name: "index_campaign_audiences_on_campaign_id_and_audience_id", unique: true
-    t.index ["campaign_id"], name: "index_campaign_audiences_on_campaign_id"
+    t.index [ "audience_id" ], name: "index_campaign_audiences_on_audience_id"
+    t.index [ "campaign_id", "audience_id" ], name: "index_campaign_audiences_on_campaign_id_and_audience_id", unique: true
+    t.index [ "campaign_id" ], name: "index_campaign_audiences_on_campaign_id"
   end
 
   create_table "campaign_sends", force: :cascade do |t|
@@ -55,10 +55,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.datetime "sent_at"
     t.string "status", limit: 20, null: false
     t.datetime "updated_at", null: false
-    t.index ["campaign_id", "contact_id", "created_at"], name: "idx_on_campaign_id_contact_id_created_at_d4b4039caa"
-    t.index ["campaign_id"], name: "index_campaign_sends_on_campaign_id"
-    t.index ["contact_id"], name: "index_campaign_sends_on_contact_id"
-    t.index ["status"], name: "index_campaign_sends_on_status"
+    t.index [ "campaign_id", "contact_id", "created_at" ], name: "idx_on_campaign_id_contact_id_created_at_d4b4039caa"
+    t.index [ "campaign_id" ], name: "index_campaign_sends_on_campaign_id"
+    t.index [ "contact_id" ], name: "index_campaign_sends_on_contact_id"
+    t.index [ "status" ], name: "index_campaign_sends_on_status"
   end
 
   create_table "campaigns", force: :cascade do |t|
@@ -73,9 +73,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.datetime "scheduled_at"
     t.string "status", limit: 20, null: false
     t.datetime "updated_at", null: false
-    t.index ["email_template_id"], name: "index_campaigns_on_email_template_id"
-    t.index ["organization_id"], name: "index_campaigns_on_organization_id"
-    t.index ["schedule_type_id"], name: "index_campaigns_on_schedule_type_id"
+    t.index [ "email_template_id" ], name: "index_campaigns_on_email_template_id"
+    t.index [ "organization_id" ], name: "index_campaigns_on_organization_id"
+    t.index [ "schedule_type_id" ], name: "index_campaigns_on_schedule_type_id"
   end
 
   create_table "common_email_templates", force: :cascade do |t|
@@ -90,7 +90,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.string "subject", limit: 255
     t.text "text_body"
     t.datetime "updated_at", null: false
-    t.index ["email_type_id"], name: "index_common_email_templates_on_email_type_id"
+    t.index [ "email_type_id" ], name: "index_common_email_templates_on_email_type_id"
   end
 
   create_table "contacts", force: :cascade do |t|
@@ -116,8 +116,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.string "subject"
     t.text "text_body"
     t.datetime "updated_at", null: false
-    t.index ["email_type_id"], name: "index_email_templates_on_email_type_id"
-    t.index ["organization_id"], name: "index_email_templates_on_organization_id"
+    t.index [ "email_type_id" ], name: "index_email_templates_on_email_type_id"
+    t.index [ "organization_id" ], name: "index_email_templates_on_organization_id"
   end
 
   create_table "email_types", force: :cascade do |t|
@@ -125,14 +125,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.string "description"
     t.string "key"
     t.datetime "updated_at", null: false
-    t.index ["key"], name: "index_email_types_on_key", unique: true
+    t.index [ "key" ], name: "index_email_types_on_key", unique: true
   end
 
   create_table "furnishing_types", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_furnishing_types_on_name", unique: true
+    t.index [ "name" ], name: "index_furnishing_types_on_name", unique: true
   end
 
   create_table "locations", force: :cascade do |t|
@@ -147,14 +147,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.text "description"
     t.string "name"
     t.datetime "updated_at", null: false
-    t.index ["deleted_at"], name: "index_organizations_on_deleted_at"
+    t.index [ "deleted_at" ], name: "index_organizations_on_deleted_at"
   end
 
   create_table "power_backup_types", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_power_backup_types_on_name", unique: true
+    t.index [ "name" ], name: "index_power_backup_types_on_name", unique: true
   end
 
   create_table "preferences", force: :cascade do |t|
@@ -172,7 +172,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.datetime "created_at", null: false
     t.string "name"
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_property_types_on_name", unique: true
+    t.index [ "name" ], name: "index_property_types_on_name", unique: true
   end
 
   create_table "roles", force: :cascade do |t|
@@ -185,7 +185,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.datetime "created_at", null: false
     t.string "name", limit: 50, null: false
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_schedule_types_on_name", unique: true
+    t.index [ "name" ], name: "index_schedule_types_on_name", unique: true
   end
 
   create_table "super_users", force: :cascade do |t|
@@ -194,7 +194,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.string "jti", null: false
     t.string "password_digest"
     t.datetime "updated_at", null: false
-    t.index ["jti"], name: "index_super_users_on_jti", unique: true
+    t.index [ "jti" ], name: "index_super_users_on_jti", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -209,10 +209,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_09_094658) do
     t.bigint "role_id", null: false
     t.string "status"
     t.datetime "updated_at", null: false
-    t.index ["deleted_at"], name: "index_users_on_deleted_at"
-    t.index ["jti"], name: "index_users_on_jti", unique: true
-    t.index ["organization_id"], name: "index_users_on_organization_id"
-    t.index ["role_id"], name: "index_users_on_role_id"
+    t.index [ "deleted_at" ], name: "index_users_on_deleted_at"
+    t.index [ "jti" ], name: "index_users_on_jti", unique: true
+    t.index [ "organization_id" ], name: "index_users_on_organization_id"
+    t.index [ "role_id" ], name: "index_users_on_role_id"
   end
 
   add_foreign_key "campaign_audiences", "audiences"

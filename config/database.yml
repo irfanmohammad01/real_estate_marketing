@@ -18,16 +18,21 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  host: localhost
-  username: <%= ENV.fetch("DB_USERNAME") %>
-  password: <%= ENV.fetch("DB_PASSWORD") %>
   pool: 5
 
+sqlite: &sqlite
+  adapter: sqlite3
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
 
 development:
-  <<: *default
-  database: real_estate_api2_dev
-
+  primary:
+    <<: *default
+    database: real_estate_api2_dev
+  cache:
+    <<: *sqlite
+    database: storage/development_cache.sqlite3
+    migrations_paths: db/cache_migrate
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
   # When left blank, PostgreSQL will use the default role. This is

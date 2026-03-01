@@ -4,7 +4,9 @@ class AudiencesController < ApplicationController
 
   def index
     @audiences = Audience.where(organization_id: current_user.organization_id)
-    render json: @audiences.as_json(except: [ :updated_at, :deleted_at ]), status: :created
+    if stale?(@audiences)
+      render json: @audiences.as_json(except: [ :updated_at, :deleted_at ])
+    end
   end
 
   def show
