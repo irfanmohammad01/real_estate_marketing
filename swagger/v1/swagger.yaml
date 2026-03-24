@@ -858,6 +858,83 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Soft delete organization admin
+      tags:
+      - Admin
+      description: Soft delete an organization admin (Super User only)
+      security:
+      - Bearer: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Organization Admin deleted successfully
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/admin/org_admins/{id}/restore":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: User ID
+    post:
+      summary: Restore deleted organization admin
+      tags:
+      - Admin
+      description: Restore a soft-deleted organization admin (Super User only)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Organization Admin restored successfully
+                  user:
+                    "$ref": "#/components/schemas/User"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/email_types":
     get:
       summary: List all email types
@@ -1226,58 +1303,7 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
-  "/email_templates/by_type":
-    get:
-      summary: Get templates by type
-      tags:
-      - Email Templates
-      description: Retrieve email templates filtered by type key (Org Admin or Org
-        User)
-      security:
-      - Bearer: []
-      parameters:
-      - name: key
-        in: query
-        required: true
-        schema:
-          type: string
-        description: Email type key
-        example: welcome_email
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    email_type_id:
-                      type: integer
-                    organization_id:
-                      type: integer
-                    name:
-                      type: string
-                    subject:
-                      type: string
-                    created_at:
-                      type: string
-                      format: datetime
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
-        '403':
-          description: forbidden
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
+
   "/preferences":
     get:
       summary: Get all preferences
@@ -1918,6 +1944,273 @@ paths:
                   error:
                     type: string
                     example: "No file uploaded. Please provide a file parameter."
+  "/contacts/send_emails":
+    post:
+      summary: Send emails to contacts
+      tags:
+      - Contacts
+      description: Send emails to a list of contacts using an email template (Org Admin or Org User)
+      security:
+      - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_template_id:
+                  type: integer
+                  example: 1
+                contact_emails:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                  example:
+                    - "john@example.com"
+                    - "jane@example.com"
+              required:
+              - email_template_id
+              - contact_emails
+      responses:
+        '200':
+          description: emails queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Queued 2 emails"
+                  count:
+                    type: integer
+                    example: 2
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: validation failed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/campaigns":
+    get:
+      summary: List all campaigns
+      tags:
+      - Campaigns
+      description: Retrieve all campaigns in the current organization (Org Admin or Org User)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Campaign"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    post:
+      summary: Create campaign
+      tags:
+      - Campaigns
+      description: Create a new campaign (Org Admin or Org User)
+      security:
+      - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Spring Sale Campaign"
+                email_template_id:
+                  type: integer
+                  example: 1
+                audience_id:
+                  type: integer
+                  example: 5
+                scheduled_at:
+                  type: string
+                  format: datetime
+                  example: "2026-03-01T10:00:00Z"
+                  description: Optional schedule time. If blank, sends immediately.
+              required:
+              - name
+              - email_template_id
+              - audience_id
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Campaign"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: validation failed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/campaigns/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Campaign ID
+    put:
+      summary: Update campaign
+      tags:
+      - Campaigns
+      description: Update campaign details (Org Admin or Org User)
+      security:
+      - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email_template_id:
+                  type: integer
+                scheduled_at:
+                  type: string
+                  format: datetime
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Campaign"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: validation failed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Delete campaign
+      tags:
+      - Campaigns
+      description: Delete a campaign (Org Admin or Org User)
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Campaign deleted successfully
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/campaigns/send_email_to_audience":
+    post:
+      summary: Send campaign to audience
+      tags:
+      - Campaigns
+      description: Manually trigger sending emails to an audience (Org Admin or Org User)
+      security:
+      - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                audience_id:
+                  type: integer
+                  example: 5
+                email_template_id:
+                  type: integer
+                  example: 1
+                scheduled_at:
+                  type: string
+                  format: datetime
+                  description: Optional schedule time
+              required:
+              - audience_id
+              - email_template_id
+      responses:
+        '200':
+          description: emails queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Queued 50 emails"
+                  count:
+                    type: integer
+                    example: 50
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Audience not found
 components:
   securitySchemes:
     Bearer:
@@ -2063,6 +2356,31 @@ components:
           type: string
           format: datetime
           nullable: true
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email_template_id:
+          type: integer
+        schedule_type_id:
+          type: integer
+        status:
+          type: string
+        scheduled_at:
+          type: string
+          format: datetime
+          nullable: true
+        organization_id:
+          type: integer
+        created_at:
+          type: string
+          format: datetime
+        updated_at:
+          type: string
+          format: datetime
     RateLimitErrorResponse:
       type: object
       properties:

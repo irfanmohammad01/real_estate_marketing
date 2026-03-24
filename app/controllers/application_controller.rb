@@ -4,12 +4,6 @@ class ApplicationController < ActionController::API
 
   attr_reader :current_super_user, :current_user
 
-  rescue_from StandardError do |e|
-    Rails.logger.error "Unexpected error: #{e.class} - #{e.message}"
-    Rails.logger.error e.backtrace.join("\n")
-    render json: { error: "Internal server error", message: "An unexpected error occurred" }, status: :internal_server_error
-  end
-
   rescue_from AuthenticationError do |e|
     render json: { error: e.message }, status: :unauthorized
   end
@@ -24,6 +18,12 @@ class ApplicationController < ActionController::API
 
   rescue_from ActionController::ParameterMissing do |e|
     render json: { error: "Missing parameter", message: "Required parameter missing: #{e.param}" }, status: :bad_request
+  end
+
+  rescue_from StandardError do |e|
+    Rails.logger.error "Unexpected error: #{e.class} - #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { error: "Internal server error", message: "An unexpected error occurred" }, status: :internal_server_error
   end
 
   def authorize_request

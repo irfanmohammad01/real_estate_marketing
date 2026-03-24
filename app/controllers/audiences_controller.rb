@@ -4,11 +4,13 @@ class AudiencesController < ApplicationController
 
   def index
     @audiences = Audience.where(organization_id: current_user.organization_id)
-    render json: @audiences.as_json(except: [ :updated_at, :deleted_at]), status: :created
+    if stale?(@audiences)
+      render json: @audiences.as_json(except: [ :updated_at, :deleted_at ])
+    end
   end
 
   def show
-    render json: @audience.as_json(except: [ :updated_at, :deleted_at]), status: :created
+    render json: @audience.as_json(except: [ :updated_at, :deleted_at ]), status: :created
   end
 
   def create
@@ -16,7 +18,7 @@ class AudiencesController < ApplicationController
     audience.organization_id = current_user.organization_id
 
     if audience.save
-      render json: audience.as_json(except: [ :updated_at, :deleted_at]), status: :created
+      render json: audience.as_json(except: [ :updated_at, :deleted_at ]), status: :created
     else
       render json: { errors: audience.errors.full_messages }, status: :unprocessable_entity
     end
@@ -24,7 +26,7 @@ class AudiencesController < ApplicationController
 
   def update
     if @audience.update(audience_params)
-      render json: @audience.as_json(except: [ :updated_at, :deleted_at]), status: :created
+        render json: @audience.as_json(except: [ :updated_at, :deleted_at ]), status: :created
     else
       render json: { errors: @audience.errors.full_messages }, status: :unprocessable_entity
     end

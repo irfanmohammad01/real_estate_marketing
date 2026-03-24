@@ -98,10 +98,6 @@ class ContactsController < ApplicationController
     page = params[:page].presence || 1
     per_page = params[:per_page].presence || 25
 
-    contacts = Contact
-                 .eager_load(:preferences)
-                 .where(organization_id: current_user.organization_id)
-
     filters = params.permit(
       :bhk_type_id,
       :furnishing_type_id,
@@ -110,39 +106,52 @@ class ContactsController < ApplicationController
       :property_type_id
     ).to_h.reject { |_, v| v.blank? }
 
-    contacts = contacts.where(preferences: filters) if filters.any?
+    contacts_scope = Contact.where(organization_id: current_user.organization_id)
+    cache_version = contacts_scope.maximum(:updated_at).to_i
 
-    contacts = contacts.page(page).per(per_page)
+    cache_key = [
+      "contacts_index",
+      "org_#{current_user.organization_id}",
+      "page_#{page}",
+      "per_page_#{per_page}",
+      filters.to_query,
+      "v#{cache_version}"
+    ].reject(&:blank?).join("/")
 
-    render json: {
-      contacts: contacts.as_json(include: :preferences),
-      pagination: {
-        current_page: contacts.current_page,
-        total_pages: contacts.total_pages,
-        total_count: contacts.total_count,
-        per_page: per_page.to_i
+    response_data = Rails.cache.fetch(cache_key, expires_in: 12.hours) do
+      contacts = contacts_scope.eager_load(:preferences)
+      contacts = contacts.where(preferences: filters) if filters.any?
+      contacts = contacts.page(page).per(per_page)
+
+      {
+        contacts: contacts.as_json(include: :preferences),
+        pagination: {
+          current_page: contacts.current_page,
+          total_pages: contacts.total_pages,
+          total_count: contacts.total_count,
+          per_page: per_page.to_i
+        }
       }
-    }
+    end
+
+    render json: response_data
   end
 
   def send_emails
-    unless params[:email_template_id].present? && params[:emails].present?
+    unless send_email_params[:email_template_id].present? && send_email_params[:emails].present?
       return render json: { error: "email_template_id and emails are required" }, status: :bad_request
     end
 
-    email_template = EmailTemplate.find_by(id: params[:email_template_id])
+    email_template = EmailTemplate.find_by(id: send_email_params[:email_template_id])
     unless email_template
       return render json: { error: "Email template not found" }, status: :not_found
     end
 
-    if !params[:emails].is_a?(Array)
+    if !send_email_params[:emails].is_a?(Array)
        return render json: { error: "Emails must be provided as an array" }, status: :bad_request
     end
 
-    params[:emails].each do |email|
-      EmailSenderWorker.perform_async(email, email_template.id, current_user.organization_id)
-    end
-
+    EmailSenderWorker.perform_async(send_email_params[:emails], email_template.id, current_user.organization_id)
     render json: { message: "Emails queued for sending successfully" }, status: :ok
   rescue => e
     Rails.logger.error "Error in send_email: #{e.message}"
@@ -156,12 +165,12 @@ class ContactsController < ApplicationController
   def send_email_params
     params.permit(
       :email_template_id,
-      :email
-    )    
+      :emails
+    )
   end
 
 
-  
+
   def extract_file_from_raw_body
     multipart_param = params.keys.find { |k| k.include?("Content-Disposition") }
     return nil unless multipart_param

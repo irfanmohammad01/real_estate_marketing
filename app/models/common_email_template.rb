@@ -1,5 +1,4 @@
 class CommonEmailTemplate < ApplicationRecord
-
   belongs_to :email_type
 
   validates :email_type_id, presence: true
