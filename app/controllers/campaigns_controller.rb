@@ -42,7 +42,7 @@ class CampaignsController < ApplicationController
 
   def send_email_to_audience
     result = process_email_to_audience(
-      send_email_to_audience_params[:audience_id],
+        send_email_to_audience_params[:audience_id],
       send_email_to_audience_params[:email_template_id],
       Time.zone.parse(send_email_to_audience_params[:scheduled_at]))
 
