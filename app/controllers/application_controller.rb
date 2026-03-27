@@ -1,5 +1,8 @@
 class ApplicationController < ActionController::API
-  rate_limit(**DEFAULT_RATE_LIMIT)
+  include ActionController::Cookies
+  include ActionController::RequestForgeryProtection
+
+  # rate_limit(**DEFAULT_RATE_LIMIT)
   before_action :authorize_request
 
   attr_reader :current_super_user, :current_user
@@ -27,8 +30,7 @@ class ApplicationController < ActionController::API
   end
 
   def authorize_request
-    header = request.headers["Authorization"]
-    token = header&.split(" ")&.last
+    token = cookies.signed[:jwt]
 
     unless token
       render json: { error: "No token provided" }, status: :unauthorized

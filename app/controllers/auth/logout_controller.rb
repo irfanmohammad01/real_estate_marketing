@@ -1,5 +1,6 @@
 class Auth::LogoutController < ApplicationController
   def destroy
+    cookies.delete(:jwt)
     if @current_super_user
       @current_super_user.rotate_jti!
       render json: { message: "Logged out successfully" }, status: :ok

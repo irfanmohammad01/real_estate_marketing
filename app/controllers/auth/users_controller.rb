@@ -12,8 +12,15 @@ class Auth::UsersController < ApplicationController
         jti: user.jti
       )
 
+      cookies.signed[:jwt] = {
+        value: token,
+        httponly: true,
+        secure: Rails.env.production?,
+        same_site: :lax,
+        expires: 24.hours.from_now
+      }
+
       render json: {
-        token: token,
         user: {
           id: user.id,
           full_name: user.full_name,

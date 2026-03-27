@@ -11,8 +11,16 @@ class Auth::SuperUsersController < ApplicationController
         jti: super_user.jti
       )
 
+      cookies.signed[:jwt] = {
+        value: token,
+        httponly: true,
+        secure: Rails.env.production?,
+        same_site: :lax,
+        expires: 24.hours.from_now
+      }
+
       render json: {
-        token: token,
+        message: "Logged in successfully",
         super_user: {
           id: super_user.id,
           email: super_user.email
