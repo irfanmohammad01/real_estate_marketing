@@ -30,7 +30,7 @@ class ApplicationController < ActionController::API
   end
 
   def authorize_request
-    token = cookies.signed[:jwt]
+    token = cookies.encrypted[:jwt]
 
     unless token
       render json: { error: "No token provided" }, status: :unauthorized

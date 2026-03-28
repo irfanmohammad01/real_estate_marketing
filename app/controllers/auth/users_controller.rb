@@ -12,7 +12,7 @@ class Auth::UsersController < ApplicationController
         jti: user.jti
       )
 
-      cookies.signed[:jwt] = {
+      cookies.encrypted[:jwt] = {
         value: token,
         httponly: true,
         secure: Rails.env.production?,

@@ -11,7 +11,7 @@ class Auth::SuperUsersController < ApplicationController
         jti: super_user.jti
       )
 
-      cookies.signed[:jwt] = {
+      cookies.encrypted[:jwt] = {
         value: token,
         httponly: true,
         secure: Rails.env.production?,
