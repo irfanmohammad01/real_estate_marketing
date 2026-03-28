@@ -17,6 +17,9 @@ Rails.application.routes.draw do
   # logout for all user types
   delete "/auth/logout", to: "auth/logout#destroy"
 
+  # token refresh
+  post "/auth/refresh", to: "auth/refresh#create"
+
   # org admin create & update
   namespace :admin do
     resources :org_admins, only: [ :create, :update, :destroy ] do

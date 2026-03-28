@@ -5,19 +5,32 @@ class Auth::UsersController < ApplicationController
   def login
     user = User.includes(:role).find_by(email: user_params[:email])
     if user&.authenticate(user_params[:password])
-      token = JsonWebToken.encode(
+      access_token = JsonWebToken.encode(
         user_id: user.id,
         role: user.role.name,
         organization_id: user.organization_id,
         jti: user.jti
       )
 
-      cookies.encrypted[:jwt] = {
-        value: token,
+      refresh_token = JsonWebToken.encode(
+        { user_id: user.id, jti: user.jti },
+        7.days.from_now.to_i
+      )
+
+      cookies.encrypted[:access_token] = {
+        value: access_token,
         httponly: true,
         secure: Rails.env.production?,
         same_site: :lax,
-        expires: 24.hours.from_now
+        expires: 15.minutes.from_now
+      }
+
+      cookies.encrypted[:refresh_token] = {
+        value: refresh_token,
+        httponly: true,
+        secure: Rails.env.production?,
+        same_site: :lax,
+        expires: 7.days.from_now
       }
 
       render json: {
