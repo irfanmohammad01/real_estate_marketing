@@ -16,35 +16,60 @@ class Auth::RefreshController < ApplicationController
       return
     end
 
-    unless decoded
-      render json: { error: "Invalid refresh token" }, status: :unauthorized
+    unless decoded && decoded[:session_id] && decoded[:jti]
+      render json: { error: "Invalid refresh token structure" }, status: :unauthorized
       return
     end
 
-    if decoded[:super_user_id]
-      user = SuperUser.find_by(id: decoded[:super_user_id])
-      is_super_user = true
-    elsif decoded[:user_id]
-      user = User.includes(:role).find_by(id: decoded[:user_id])
-      is_super_user = false
-    end
+    session = RefreshToken.find_by(id: decoded[:session_id])
 
-    if user.nil? || user.jti != decoded[:jti]
-      render json: { error: "Token revoked or user not found" }, status: :unauthorized
+    if session.nil?
+      render json: { error: "Session revoked" }, status: :unauthorized
       return
     end
 
-    if is_super_user
+    if session.token != decoded[:jti]
+      session.destroy!
+      render json: { error: "Token reuse detected. Session revoked." }, status: :unauthorized
+      return
+    end
+
+    if session.expires_at && session.expires_at < Time.current
+      session.destroy!
+      render json: { error: "Session expired" }, status: :unauthorized
+      return
+    end
+
+    user = session.authenticatable
+
+    if user.nil?
+      render json: { error: "User not found" }, status: :unauthorized
+      return
+    end
+
+    session.update!(token: SecureRandom.uuid, expires_at: 7.days.from_now)
+
+    if session.authenticatable_type == "SuperUser"
       access_token = JsonWebToken.encode(
         super_user_id: user.id,
-        jti: user.jti
+        jti: session.token,
+        session_id: session.id
+      )
+      refresh_token = JsonWebToken.encode(
+        { super_user_id: user.id, jti: session.token, session_id: session.id },
+        7.days.from_now.to_i
       )
     else
       access_token = JsonWebToken.encode(
         user_id: user.id,
         role: user.role.name,
         organization_id: user.organization_id,
-        jti: user.jti
+        jti: session.token,
+        session_id: session.id
+      )
+      refresh_token = JsonWebToken.encode(
+        { user_id: user.id, jti: session.token, session_id: session.id },
+        7.days.from_now.to_i
       )
     end
 
@@ -54,6 +79,14 @@ class Auth::RefreshController < ApplicationController
       secure: Rails.env.production?,
       same_site: :lax,
       expires: 15.minutes.from_now
+    }
+
+    cookies.encrypted[:refresh_token] = {
+      value: refresh_token,
+      httponly: true,
+      secure: Rails.env.production?,
+      same_site: :lax,
+      expires: 7.days.from_now
     }
 
     render json: { message: "Token refreshed successfully" }, status: :ok

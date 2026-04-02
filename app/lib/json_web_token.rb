@@ -2,7 +2,7 @@ class JsonWebToken
   SECRET_KEY = Rails.application.secret_key_base
 
   def self.encode(payload, exp =  15.minutes.from_now.to_i)
-    raise ArgumentError, "JTI is required in payload" unless payload[:jti].present?
+    raise ArgumentError, "JTI and session_id are required in payload" unless payload[:jti].present? && payload[:session_id].present?
 
     payload[:exp] = exp.to_i
     JWT.encode(payload, SECRET_KEY, "HS256")

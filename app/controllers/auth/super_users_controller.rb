@@ -6,13 +6,19 @@ class Auth::SuperUsersController < ApplicationController
     super_user = SuperUser.find_by(email: params[:email])
 
     if super_user&.authenticate(params[:password])
+      session = super_user.refresh_tokens.create!(
+        token: SecureRandom.uuid,
+        expires_at: 7.days.from_now
+      )
+
       access_token = JsonWebToken.encode(
         super_user_id: super_user.id,
-        jti: super_user.jti
+        jti: session.token,
+        session_id: session.id
       )
 
       refresh_token = JsonWebToken.encode(
-        { super_user_id: super_user.id, jti: super_user.jti },
+        { super_user_id: super_user.id, jti: session.token, session_id: session.id },
         7.days.from_now.to_i
       )
 

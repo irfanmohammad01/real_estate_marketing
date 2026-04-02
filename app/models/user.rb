@@ -4,6 +4,7 @@ class User < ApplicationRecord
   VALID_EMAIL_REGEX = /\A[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\z/
   belongs_to :organization
   belongs_to :role
+  has_many :refresh_tokens, as: :authenticatable, dependent: :destroy
   has_secure_password
 
 

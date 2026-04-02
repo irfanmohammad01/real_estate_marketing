@@ -49,20 +49,25 @@ class ApplicationController < ActionController::API
       return
     end
 
+    session_id = decoded[:session_id]
+    jti = decoded[:jti]
+
+    unless session_id && jti
+      render json: { error: "Invalid token structure" }, status: :unauthorized
+      return
+    end
+
+    session = RefreshToken.find_by(id: session_id)
+
+    if session.nil? || session.token != jti || (session.expires_at && session.expires_at < Time.current)
+      render json: { error: "Session revoked or expired" }, status: :unauthorized
+      return
+    end
+
     if decoded[:super_user_id]
       @current_super_user = SuperUser.find_by(id: decoded[:super_user_id])
-
-      if @current_super_user && @current_super_user.jti != decoded[:jti]
-        render json: { error: "Token revoked" }, status: :unauthorized
-        return
-      end
     elsif decoded[:user_id]
       @current_user = User.find_by(id: decoded[:user_id])
-
-      if @current_user && @current_user.jti != decoded[:jti]
-        render json: { error: "Token revoked" }, status: :unauthorized
-        return
-      end
     end
 
     unless @current_super_user || @current_user
